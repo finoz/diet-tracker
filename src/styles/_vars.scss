@@ -1,0 +1,29 @@
+// ─── Variabili come CSS custom properties ───────────────────────────────────
+// Non usare variabili Sass per i valori di design: stanno qui in :root
+// così sono accessibili anche via JS e nei componenti senza @use.
+
+:root {
+  // Palette
+  --cream:       #f7f3ee;
+  --cream-dark:  #ede7de;
+  --ink:         #1a1714;
+  --ink-soft:    #5a524a;
+  --ink-muted:   #9e9188;
+  --accent:      #c25c2a;
+  --accent-soft: #f0e0d4;
+
+  // Pattern colori
+  --t1:      #4a7c6f;
+  --t1-soft: #daeee9;
+  --t2:      #7c6e4a;
+  --t2-soft: #f0e9d8;
+  --t3:      #4a5f7c;
+  --t3-soft: #d8e4f0;
+  --t4:      #7c4a6e;
+  --t4-soft: #f0d8ec;
+
+  // Shape & shadow
+  --radius:    12px;
+  --radius-sm: 6px;
+  --shadow:    0 1px 3px rgba(26, 23, 20, 0.08), 0 4px 12px rgba(26, 23, 20, 0.05);
+}

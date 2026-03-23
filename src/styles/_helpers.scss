@@ -1,0 +1,62 @@
+// ─── Helpers: mixins, funzioni, breakpoint ───────────────────────────────────
+// Importare nei componenti con: @use 'helpers' as *
+// Le CSS vars non servono qui: sono globali via _vars.scss
+
+@use 'sass:map';
+
+// ── Breakpoint ────────────────────────────────────────────────────────────────
+
+$breakpoints: (
+  'sm': 480px,
+  'md': 768px,
+  'lg': 1100px,
+);
+
+@mixin respond-to($bp) {
+  @media (max-width: #{map.get($breakpoints, $bp)}) {
+    @content;
+  }
+}
+
+// ── Mixin card ────────────────────────────────────────────────────────────────
+
+@mixin card($padding: 1.25rem) {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: $padding;
+}
+
+// ── Mixin label uppercase ─────────────────────────────────────────────────────
+
+@mixin label-xs {
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+
+// ── Mixin font serif ──────────────────────────────────────────────────────────
+
+@mixin font-serif {
+  font-family: 'DM Serif Display', serif;
+}
+
+// ── Mixin pill colore pattern ─────────────────────────────────────────────────
+
+@mixin pattern-colors {
+  &.pattern-T1 { background: var(--t1-soft); color: var(--t1); }
+  &.pattern-T2 { background: var(--t2-soft); color: var(--t2); }
+  &.pattern-T3 { background: var(--t3-soft); color: var(--t3); }
+  &.pattern-T4 { background: var(--t4-soft); color: var(--t4); }
+}
+
+// ── Mixin border-left pattern ─────────────────────────────────────────────────
+
+@mixin pattern-border-colors {
+  &.pattern-T1 { border-left-color: var(--t1); background: var(--t1-soft); }
+  &.pattern-T2 { border-left-color: var(--t2); background: var(--t2-soft); }
+  &.pattern-T3 { border-left-color: var(--t3); background: var(--t3-soft); }
+  &.pattern-T4 { border-left-color: var(--t4); background: var(--t4-soft); }
+}

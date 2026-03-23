@@ -1,0 +1,241 @@
+{
+  "meta": {
+    "version": "1.0",
+    "free_meals_per_week": 2,
+    "notes": "I pasti liberi sono sempre 2 a settimana. Possono essere spostati ma non eliminati."
+  },
+
+  "proteins": {
+    "pollo":    { "label": "Pollo",         "g": 150, "weekly_min": 2, "weekly_max": 3, "type": "carne_bianca" },
+    "tacchino": { "label": "Tacchino",      "g": 225, "weekly_min": 0, "weekly_max": 3, "type": "carne_bianca" },
+    "manzo":    { "label": "Manzo/Vitello", "g": 200, "weekly_min": 0, "weekly_max": 1, "type": "carne_rossa" },
+    "pesce":    { "label": "Pesce",         "g": 225, "weekly_min": 2, "weekly_max": 4, "type": "pesce" },
+    "uova":     { "label": "Uova x2",       "g": null, "weekly_min": 0, "weekly_max": 2, "type": "uova" },
+    "legumi":   { "label": "Legumi",        "g": null, "weekly_min": 2, "weekly_max": null, "type": "legumi" },
+    "ricotta":  { "label": "Ricotta",       "g": 90,  "weekly_min": 0, "weekly_max": 2, "type": "latticino" },
+    "tofu":     { "label": "Tofu",          "g": 150, "weekly_min": 0, "weekly_max": 2, "type": "vegetale" }
+  },
+
+  "carbs": {
+    "pasta":     { "label": "Pasta",      "g": 80  },
+    "pasta_100": { "label": "Pasta",      "g": 100 },
+    "gnocchi":   { "label": "Gnocchi",    "g": 250 },
+    "riso":      { "label": "Riso",       "g": 80  },
+    "orzo_farro":{ "label": "Orzo/Farro", "g": 80  },
+    "pane":      { "label": "Pane",       "g": null }
+  },
+
+  "breakfasts": {
+    "A": {
+      "label": "Tè + yogurt greco + semi + frutto",
+      "components": [
+        { "item": "Tè",                            "qty": "1 tazza" },
+        { "item": "Yogurt greco",                  "qty": "1 vasetto" },
+        { "item": "Semi oleosi (zucca, girasole)", "qty": "2-3 cucchiai" },
+        { "item": "Frutto",                        "qty": "1 medio" }
+      ]
+    },
+    "B": {
+      "label": "Latte + cereali o fette biscottate + frutto",
+      "components": [
+        { "item": "Latte (o bevanda soia)",                              "qty": "1 tazza" },
+        { "item": "Cereali (5-6 cucchiai) o 2 fette biscottate o 2 Wasa", "qty": null },
+        { "item": "Frutto",                                              "qty": "1 medio" }
+      ],
+      "notes": "Cereali sostituibili con granola fatta in casa (3-4 cucchiai). Burro sostituibile con burro d'arachidi 100%."
+    },
+    "C": {
+      "label": "Tè + porridge d'avena + frutto",
+      "components": [
+        { "item": "Tè",                  "qty": "1 tazza" },
+        { "item": "Fiocchi d'avena",     "qty": "50g" },
+        { "item": "Latte (o soia)",      "qty": "350ml" },
+        { "item": "Frutto (es. banana)", "qty": "1" }
+      ],
+      "notes": "Opzionale: 1 cucchiaino di miele."
+    }
+  },
+
+  "snacks": {
+    "morning": {
+      "label": "Spuntino mattina",
+      "components": [
+        { "item": "Caffè",        "qty": "1 tazzina" },
+        { "item": "Frutto",       "qty": "1 medio o 150g piccoli frutti" },
+        { "item": "Frutta secca", "qty": "~30g (es. 20 mandorle, 5-8 noci, 2-3 cucchiai pistacchi)" }
+      ]
+    },
+    "afternoon": {
+      "label": "Spuntino pomeriggio",
+      "components": [
+        { "item": "Frutto",          "qty": "1 medio o 150g piccoli frutti" },
+        { "item": "Yogurt scremato", "qty": "1 vasetto (ove indicato nella griglia)" }
+      ]
+    }
+  },
+
+  "patterns": {
+    "T1": {
+      "label": "Carboidrato + proteina + verdure",
+      "requires": ["carb", "protein", "verdure"]
+    },
+    "T2": {
+      "label": "Legumi + verdure",
+      "requires": ["legumi", "verdure"],
+      "protein_ref": "legumi",
+      "notes": "Spesso accompagnato da pane."
+    },
+    "T3": {
+      "label": "Solo verdure (minestrone / passato)",
+      "requires": ["verdure"],
+      "notes": "Sempre con pane. Pasto leggero."
+    },
+    "T4": {
+      "label": "Libero",
+      "requires": []
+    }
+  },
+
+  "week": {
+    "monday": {
+      "breakfast": "A",
+      "lunch": {
+        "pattern": "T1",
+        "carb": "riso",
+        "protein": "pollo",
+        "verdure_g": 200
+      },
+      "dinner": {
+        "pattern": "T1",
+        "carb": "pasta",
+        "protein": "pesce",
+        "verdure_g": 225,
+        "alt": {
+          "pattern": "T2",
+          "protein": "legumi",
+          "verdure_g": 225,
+          "pane": true
+        }
+      }
+    },
+    "tuesday": {
+      "breakfast": "B",
+      "lunch": {
+        "pattern": "T1",
+        "carb": "orzo_farro",
+        "protein": "pollo",
+        "protein_variants": ["100g salmone affumicato"],
+        "verdure_g": 250
+      },
+      "dinner": {
+        "pattern": "T1",
+        "carb": null,
+        "protein": "tacchino",
+        "verdure_g": 250,
+        "pane": true,
+        "alt": {
+          "pattern": "T1",
+          "carb": null,
+          "protein": "manzo",
+          "verdure_g": 250
+        }
+      }
+    },
+    "wednesday": {
+      "breakfast": "B",
+      "lunch": {
+        "pattern": "T1",
+        "carb": "pasta_100",
+        "protein": "pesce",
+        "verdure_g": 250
+      },
+      "dinner": {
+        "pattern": "T2",
+        "protein": "legumi",
+        "verdure_g": 225,
+        "pane": true,
+        "alt": {
+          "pattern": "T3",
+          "verdure_g": 250,
+          "pane": true
+        }
+      }
+    },
+    "thursday": {
+      "breakfast": "A",
+      "lunch": {
+        "pattern": "T1",
+        "carb": "pasta_100",
+        "carb_variants": ["gnocchi:250g"],
+        "protein": "ricotta",
+        "verdure_g": 200
+      },
+      "dinner": {
+        "pattern": "T1",
+        "carb": null,
+        "protein": "pesce",
+        "verdure_g": 225,
+        "alt": {
+          "pattern": "T1",
+          "carb": "riso",
+          "protein": "pollo",
+          "verdure_g": 200
+        }
+      }
+    },
+    "friday": {
+      "breakfast": "B",
+      "lunch": {
+        "pattern": "T2",
+        "protein": "legumi",
+        "verdure_g": 200
+      },
+      "dinner": {
+        "pattern": "T1",
+        "carb": "pasta",
+        "protein": "uova",
+        "verdure_g": 225,
+        "alt": {
+          "pattern": "T1",
+          "carb": null,
+          "protein": "pesce",
+          "verdure_g": 225,
+          "pane": true
+        }
+      }
+    },
+    "saturday": {
+      "breakfast": "C",
+      "lunch": {
+        "pattern": "T1",
+        "carb": "riso",
+        "protein": "pollo",
+        "protein_variants": ["tacchino"],
+        "verdure_g": 250,
+        "notes": "In alternativa: risotto con condimento a piacere + 250g verdure"
+      },
+      "dinner": {
+        "pattern": "T4",
+        "free": true
+      }
+    },
+    "sunday": {
+      "breakfast": "B",
+      "lunch": {
+        "pattern": "T4",
+        "free": true
+      },
+      "dinner": {
+        "pattern": "T3",
+        "verdure_g": 250,
+        "pane": true,
+        "alt": {
+          "pattern": "T1",
+          "carb": null,
+          "protein": "pesce",
+          "verdure_g": 225
+        }
+      }
+    }
+  }
+}
