@@ -48,14 +48,69 @@
 
         <!-- Pranzo -->
         <div class="section">
-          <div class="section-label">pranzo</div>
+          <div class="section-label-row">
+            <span class="section-label">pranzo</span>
+            <span v-if="swapMap[`${day.key}_lunch`]" class="swap-badge">
+              ↔ {{ dayLabel(swapMap[`${day.key}_lunch`].day) }} cena/pranzo
+            </span>
+          </div>
           <MealSlot :meal="day.lunch" label="pranzo" />
         </div>
 
         <!-- Cena -->
         <div class="section">
-          <div class="section-label">cena</div>
+          <div class="section-label-row">
+            <span class="section-label">cena</span>
+            <span v-if="swapMap[`${day.key}_dinner`]" class="swap-badge">
+              ↔ {{ dayLabel(swapMap[`${day.key}_dinner`].day) }} cena/pranzo
+            </span>
+          </div>
           <MealSlot :meal="day.dinner" label="cena" />
+        </div>
+
+        <!-- Log giornaliero -->
+        <div class="section log-section">
+          <div class="section-label">log giornaliero</div>
+          <div class="log-form">
+            <div class="log-row">
+              <label class="log-check">
+                <input type="checkbox" v-model="logForm.breakfast_ok" @change="saveLog" />
+                <span>colazione ok</span>
+              </label>
+            </div>
+            <div class="log-row">
+              <span class="log-field-label">pranzo</span>
+              <div class="log-status-group">
+                <button
+                  v-for="s in statuses"
+                  :key="s.value"
+                  class="log-status-btn"
+                  :class="{ active: logForm.lunch_status === s.value }"
+                  @click="setStatus('lunch_status', s.value)"
+                >{{ s.label }}</button>
+              </div>
+            </div>
+            <div class="log-row">
+              <span class="log-field-label">cena</span>
+              <div class="log-status-group">
+                <button
+                  v-for="s in statuses"
+                  :key="s.value"
+                  class="log-status-btn"
+                  :class="{ active: logForm.dinner_status === s.value }"
+                  @click="setStatus('dinner_status', s.value)"
+                >{{ s.label }}</button>
+              </div>
+            </div>
+            <textarea
+              v-model="logForm.notes"
+              class="log-notes"
+              placeholder="note libere: peso, sgarri, ecc."
+              rows="2"
+              @blur="saveLog"
+            />
+            <span v-if="saving" class="log-saving">salvataggio…</span>
+          </div>
         </div>
 
       </div>
@@ -64,26 +119,78 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import MealSlot from './MealSlot.vue'
+import { useLog } from '../composables/useLog.js'
 
 const props = defineProps({
-  day: { type: Object, required: true },
-  todayKey: { type: String, required: true }
+  day:      { type: Object, required: true },
+  todayKey: { type: String, required: true },
+  dateStr:  { type: String, required: true }, // "YYYY-MM-DD"
 })
 
 const DAYS_ORDER = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']
 
 const isPast = computed(() => {
   const todayIdx = DAYS_ORDER.indexOf(props.todayKey)
-  const dayIdx = DAYS_ORDER.indexOf(props.day.key)
+  const dayIdx   = DAYS_ORDER.indexOf(props.day.key)
   return dayIdx < todayIdx
 })
 
-// Aperto di default solo se oggi
 const isOpen = ref(props.day.isToday)
-
 function toggle() { isOpen.value = !isOpen.value }
+
+// ── Log ──────────────────────────────────────────────────────────────────────
+
+const DAYS_IT_SHORT = {
+  monday: 'lun', tuesday: 'mar', wednesday: 'mer',
+  thursday: 'gio', friday: 'ven', saturday: 'sab', sunday: 'dom',
+}
+function dayLabel(key) { return DAYS_IT_SHORT[key] ?? key }
+
+const { getLog, upsertLog, swapMap } = useLog()
+
+const statuses = [
+  { value: 'ok',     label: 'ok' },
+  { value: 'sgarro', label: 'sgarro' },
+]
+
+const logForm = ref({
+  breakfast_ok:   false,
+  lunch_status:   null,
+  dinner_status:  null,
+  notes:          '',
+})
+
+const saving = ref(false)
+
+// Popola il form quando i log vengono caricati
+watch(() => getLog(props.dateStr), (log) => {
+  if (!log) return
+  logForm.value = {
+    breakfast_ok:  log.breakfast_ok  ?? false,
+    lunch_status:  log.lunch_status  ?? null,
+    dinner_status: log.dinner_status ?? null,
+    notes:         log.notes         ?? '',
+  }
+}, { immediate: true })
+
+async function saveLog() {
+  saving.value = true
+  await upsertLog(props.dateStr, {
+    breakfast_ok:  logForm.value.breakfast_ok,
+    lunch_status:  logForm.value.lunch_status  || null,
+    dinner_status: logForm.value.dinner_status || null,
+    notes:         logForm.value.notes         || null,
+  })
+  saving.value = false
+}
+
+function setStatus(field, value) {
+  // click sullo stesso bottone → deseleziona
+  logForm.value[field] = logForm.value[field] === value ? null : value
+  saveLog()
+}
 </script>
 
 <style lang="scss" scoped>
@@ -191,8 +298,23 @@ function toggle() { isOpen.value = !isOpen.value }
   gap: 0.4rem;
 }
 
+.section-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .section-label {
   @include label-xs;
+}
+
+.swap-badge {
+  font-size: 0.62rem;
+  color: var(--t3);
+  background: var(--t3-soft);
+  padding: 0.1rem 0.4rem;
+  border-radius: 20px;
+  font-weight: 500;
 }
 
 .breakfast-content {
@@ -251,6 +373,109 @@ function toggle() { isOpen.value = !isOpen.value }
 .snack-desc {
   font-size: 0.78rem;
   color: var(--ink-soft);
+}
+
+// ── Log form ──────────────────────────────────────────────────────────────────
+
+.log-section {
+  border-top: 1px dashed var(--cream-dark);
+  padding-top: 0.75rem;
+}
+
+.log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.log-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.log-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    accent-color: var(--t1);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+}
+
+.log-field-label {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  min-width: 38px;
+}
+
+.log-status-group {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.log-status-btn {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  border: 1px solid var(--cream-dark);
+  color: var(--ink-muted);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    border-color: var(--ink-muted);
+    color: var(--ink-soft);
+  }
+
+  &.active[class*="ok"] ,
+  &.active:first-child {
+    background: var(--t1-soft);
+    color: var(--t1);
+    border-color: var(--t1);
+  }
+
+  &.active:last-child {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+}
+
+.log-notes {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 300;
+  color: var(--ink);
+  background: var(--cream);
+  border: 1px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  resize: vertical;
+  line-height: 1.5;
+
+  &::placeholder {
+    color: var(--ink-muted);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--ink-muted);
+  }
+}
+
+.log-saving {
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  font-style: italic;
+  align-self: flex-end;
 }
 
 // ── Transizione apertura ──────────────────────────────────────────────────────

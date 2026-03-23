@@ -17,19 +17,21 @@
     </div>
     <div class="heatmap-grid">
       <div
-        v-for="(cell, i) in cells"
-        :key="i"
+        v-for="cell in cells"
         class="heatmap-cell"
         :class="`level-${cell.level}`"
         :title="cell.label"
+        :key="cell.dateStr"
       ></div>
     </div>
-    <p class="heatmap-note">il tracking giornaliero sarà disponibile nella prossima versione</p>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useLog } from '../composables/useLog'
+
+const { heatmapLevel } = useLog()
 
 // Genera 52 settimane × 7 giorni = 364 celle, come GitHub
 const cells = computed(() => {
@@ -38,9 +40,10 @@ const cells = computed(() => {
   for (let i = 363; i >= 0; i--) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
+    const dateStr = d.toISOString().slice(0, 10)
     result.push({
-      date: d,
-      level: 0, // 0 = non tracciato, sarà popolato dal DB
+      dateStr,
+      level: heatmapLevel(dateStr),
       label: d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
     })
   }

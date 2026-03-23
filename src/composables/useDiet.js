@@ -18,16 +18,28 @@ export function useDiet() {
   })
 
   // Settimana come array ordinato con label italiana
-  const week = computed(() =>
-    DAYS_ORDER.map(key => ({
-      key,
-      label: DAYS_IT[key],
-      isToday: key === todayKey.value,
-      breakfast: resolveBreakfast(config.week[key].breakfast),
-      lunch: resolveMeal(config.week[key].lunch),
-      dinner: resolveMeal(config.week[key].dinner),
-    }))
-  )
+  const week = computed(() => {
+    const now = new Date()
+    const jsDay = now.getDay()
+    const monday = new Date(now)
+    monday.setDate(now.getDate() - ((jsDay + 6) % 7))
+    monday.setHours(0, 0, 0, 0)
+
+    return DAYS_ORDER.map((key, i) => {
+      const d = new Date(monday)
+      d.setDate(monday.getDate() + i)
+      const dateStr = d.toISOString().slice(0, 10)
+      return {
+        key,
+        label: DAYS_IT[key],
+        isToday: key === todayKey.value,
+        dateStr,
+        breakfast: resolveBreakfast(config.week[key].breakfast),
+        lunch: resolveMeal(config.week[key].lunch),
+        dinner: resolveMeal(config.week[key].dinner),
+      }
+    })
+  })
 
   function resolveBreakfast(code) {
     return { code, ...config.breakfasts[code] }

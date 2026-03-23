@@ -15,10 +15,12 @@
           :key="day.key"
           :day="day"
           :todayKey="todayKey"
+          :dateStr="day.dateStr"
         />
       </div>
 
       <aside class="sidebar">
+        <WeekSwaps />
         <ProteinSummary :proteinSummary="proteinSummary" />
         <ActivityHeatmap />
       </aside>
@@ -28,13 +30,23 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useDiet } from '../composables/useDiet.js'
+import { useLog } from '../composables/useLog.js'
 import DayCard from '../components/DayCard.vue'
 import ProteinSummary from '../components/ProteinSummary.vue'
 import ActivityHeatmap from '../components/ActivityHeatmap.vue'
+import WeekSwaps from '../components/WeekSwaps.vue'
 
 const { week, todayKey, proteinSummary } = useDiet()
+const { fetchLogsForYear, fetchSwapsForWeek, getWeekStart } = useLog()
+
+onMounted(async () => {
+  await Promise.all([
+    fetchLogsForYear(),
+    fetchSwapsForWeek(getWeekStart()),
+  ])
+})
 
 const weekRange = computed(() => {
   const now = new Date()
