@@ -125,12 +125,15 @@ export function useLog() {
     return map
   })
 
-  // Livello heatmap per una data: 0=non loggato, 1=ok, 2=sgarro
+  // Livello heatmap per una data:
+  // 0 = non loggato, 1 = ok, 2 = sgarro, 3 = ok + attività fisica
   function heatmapLevel(dateStr) {
     const log = getLog(dateStr)
     if (!log) return 0
     const hasSgarro = log.lunch_status === 'sgarro' || log.dinner_status === 'sgarro'
-    return hasSgarro ? 2 : 1
+    if (hasSgarro) return 2
+    if (log.activity) return 3
+    return 1
   }
 
   return {

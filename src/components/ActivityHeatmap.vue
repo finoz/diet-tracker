@@ -12,7 +12,7 @@
         <span class="legend-dot level-2"></span> qualche sgarro
       </span>
       <span class="legend-item">
-        <span class="legend-dot level-3"></span> giornata libera
+        <span class="legend-dot level-3"></span> ok + attività
       </span>
     </div>
     <div class="heatmap-grid">
@@ -109,7 +109,7 @@ const cells = computed(() => {
 .level-0 { background: var(--cream-dark); }
 .level-1 { background: #86c4a4; }
 .level-2 { background: #e8a86a; }
-.level-3 { background: var(--t4-soft); border: 1px solid var(--t4); }
+.level-3 { background: #3a8f6e; }
 
 .heatmap-note {
   font-size: 0.68rem;
