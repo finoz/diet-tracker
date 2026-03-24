@@ -4,3 +4,13 @@
 @use 'reset';
 @use 'typography';
 @use 'base';
+@use 'layout';
+
+// ── Componenti ────────────────────────────────────────────────────────────────
+
+@use 'components/day-card';
+@use 'components/meal-slot';
+@use 'components/protein-summary';
+@use 'components/activity-heatmap';
+@use 'components/swap-picker-modal';
+@use 'components/week-swaps';
