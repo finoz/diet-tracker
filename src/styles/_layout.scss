@@ -48,6 +48,36 @@
   color: var(--ink-muted);
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  flex: 1;
+}
+
+.header-login {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  border: 1px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.6rem;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: var(--ink);
+    border-color: var(--ink-muted);
+    text-decoration: none;
+  }
+}
+
+.header-logout {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  border: 1px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.6rem;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: var(--ink);
+    border-color: var(--ink-muted);
+  }
 }
 
 .app-main {

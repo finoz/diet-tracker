@@ -50,7 +50,7 @@
         <div class="section">
           <div class="section-label-row">
             <span class="section-label">pranzo</span>
-            <div class="meal-swap-ctrl">
+            <div v-if="user" class="meal-swap-ctrl">
               <template v-if="swapMap[`${day.key}_lunch`]">
                 <span class="swap-badge">↔ {{ dayLabel(swapMap[`${day.key}_lunch`].day) }} {{ mealLabel(swapMap[`${day.key}_lunch`].meal) }}</span>
                 <button class="swap-remove" @click.stop="removeSwap(swapMap[`${day.key}_lunch`].id)">×</button>
@@ -58,7 +58,7 @@
               <button v-else class="swap-cta" @click.stop="openSwapModal('lunch')" title="scambia pasto">↔</button>
             </div>
           </div>
-          <div v-if="lunchHasAlt" class="alt-selector">
+          <div v-if="user && lunchHasAlt" class="alt-selector">
             <button class="alt-btn" :class="{ active: !logForm.lunch_alt }" @click="setAlt('lunch_alt', false)">piano</button>
             <button class="alt-btn" :class="{ active: logForm.lunch_alt  }" @click="setAlt('lunch_alt', true)">alternativa</button>
           </div>
@@ -69,7 +69,7 @@
         <div class="section">
           <div class="section-label-row">
             <span class="section-label">cena</span>
-            <div class="meal-swap-ctrl">
+            <div v-if="user" class="meal-swap-ctrl">
               <template v-if="swapMap[`${day.key}_dinner`]">
                 <span class="swap-badge">↔ {{ dayLabel(swapMap[`${day.key}_dinner`].day) }} {{ mealLabel(swapMap[`${day.key}_dinner`].meal) }}</span>
                 <button class="swap-remove" @click.stop="removeSwap(swapMap[`${day.key}_dinner`].id)">×</button>
@@ -77,7 +77,7 @@
               <button v-else class="swap-cta" @click.stop="openSwapModal('dinner')" title="scambia pasto">↔</button>
             </div>
           </div>
-          <div v-if="dinnerHasAlt" class="alt-selector">
+          <div v-if="user && dinnerHasAlt" class="alt-selector">
             <button class="alt-btn" :class="{ active: !logForm.dinner_alt }" @click="setAlt('dinner_alt', false)">piano</button>
             <button class="alt-btn" :class="{ active: logForm.dinner_alt  }" @click="setAlt('dinner_alt', true)">alternativa</button>
           </div>
@@ -85,7 +85,7 @@
         </div>
 
         <!-- Log giornaliero -->
-        <div class="section log-section">
+        <div v-if="user" class="section log-section">
           <div class="section-label">log giornaliero</div>
           <div class="log-form">
             <div class="log-checks-row">
@@ -153,6 +153,7 @@ import MealSlot from './MealSlot.vue'
 import SwapPickerModal from './SwapPickerModal.vue'
 import { useLog } from '../composables/useLog.js'
 import { useDiet } from '../composables/useDiet.js'
+import { useAuth } from '../composables/useAuth.js'
 
 const props = defineProps({
   day:      { type: Object, required: true },
@@ -183,6 +184,7 @@ function toggle() { isOpen.value = !isOpen.value }
 
 const { week } = useDiet()
 const { getLog, upsertLog, swapMap, addSwap, deleteSwap } = useLog()
+const { user } = useAuth()
 
 // Pasto base (già considerando lo swap, ma senza alt)
 function resolveSwappedMeal(meal) {

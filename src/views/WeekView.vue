@@ -21,8 +21,8 @@
 
       <aside class="sidebar">
         <WeekSwaps />
-        <ProteinSummary :proteinSummary="proteinSummary" />
-        <ActivityHeatmap />
+        <ProteinSummary v-if="user" :proteinSummary="proteinSummary" />
+        <ActivityHeatmap v-if="user" />
       </aside>
     </div>
 
@@ -33,12 +33,14 @@
 import { computed, onMounted } from 'vue'
 import { useDiet } from '../composables/useDiet.js'
 import { useLog } from '../composables/useLog.js'
+import { useAuth } from '../composables/useAuth.js'
 import DayCard from '../components/DayCard.vue'
 import ProteinSummary from '../components/ProteinSummary.vue'
 import ActivityHeatmap from '../components/ActivityHeatmap.vue'
 import WeekSwaps from '../components/WeekSwaps.vue'
 
 const { week, todayKey, config } = useDiet()
+const { user } = useAuth()
 const { fetchLogsForYear, fetchSwapsForWeek, getWeekStart, swapMap, dailyLogs } = useLog()
 
 // proteinSummary che tiene conto di swap e scelte alt

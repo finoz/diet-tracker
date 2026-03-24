@@ -8,7 +8,7 @@
           <span class="swap-arrow">↔</span>
           {{ dayLabel(s.day_b) }} {{ mealLabel(s.meal_b) }}
         </span>
-        <button class="swap-delete" @click="remove(s.id)" title="rimuovi">×</button>
+        <button v-if="user" class="swap-delete" @click="remove(s.id)" title="rimuovi">×</button>
       </div>
     </div>
   </div>
@@ -16,8 +16,10 @@
 
 <script setup>
 import { useLog } from '../composables/useLog.js'
+import { useAuth } from '../composables/useAuth.js'
 
 const { weekSwaps, deleteSwap } = useLog()
+const { user } = useAuth()
 
 const DAYS_IT = {
   monday: 'lun', tuesday: 'mar', wednesday: 'mer',
