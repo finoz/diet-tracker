@@ -7,11 +7,11 @@
         <span v-if="day.isToday" class="today-badge">oggi</span>
       </div>
       <div class="day-summary">
-        <span class="summary-pill" :class="`pattern-${day.lunch.patternKey}`">
-          {{ day.lunch.proteinLabel || 'Legumi' }}
+        <span class="summary-pill" :class="`pattern-${effectiveLunch.patternKey}`">
+          {{ effectiveLunch.proteinLabel || 'Legumi' }}
         </span>
-        <span class="summary-pill" :class="`pattern-${day.dinner.patternKey}`">
-          {{ day.dinner.patternKey === 'T4' ? 'libero' : (day.dinner.proteinLabel || day.dinner.patternKey) }}
+        <span class="summary-pill" :class="`pattern-${effectiveDinner.patternKey}`">
+          {{ effectiveDinner.patternKey === 'T4' ? 'libero' : (effectiveDinner.proteinLabel || effectiveDinner.patternKey) }}
         </span>
       </div>
       <span class="chevron" :class="{ open: isOpen }">›</span>
@@ -58,7 +58,11 @@
               <button v-else class="swap-cta" @click.stop="openSwapModal('lunch')" title="scambia pasto">↔</button>
             </div>
           </div>
-          <MealSlot :meal="day.lunch" label="pranzo" />
+          <div v-if="lunchHasAlt" class="alt-selector">
+            <button class="alt-btn" :class="{ active: !logForm.lunch_alt }" @click="setAlt('lunch_alt', false)">piano</button>
+            <button class="alt-btn" :class="{ active: logForm.lunch_alt  }" @click="setAlt('lunch_alt', true)">alternativa</button>
+          </div>
+          <MealSlot :meal="effectiveLunch" label="pranzo" />
         </div>
 
         <!-- Cena -->
@@ -73,7 +77,11 @@
               <button v-else class="swap-cta" @click.stop="openSwapModal('dinner')" title="scambia pasto">↔</button>
             </div>
           </div>
-          <MealSlot :meal="day.dinner" label="cena" />
+          <div v-if="dinnerHasAlt" class="alt-selector">
+            <button class="alt-btn" :class="{ active: !logForm.dinner_alt }" @click="setAlt('dinner_alt', false)">piano</button>
+            <button class="alt-btn" :class="{ active: logForm.dinner_alt  }" @click="setAlt('dinner_alt', true)">alternativa</button>
+          </div>
+          <MealSlot :meal="effectiveDinner" label="cena" />
         </div>
 
         <!-- Log giornaliero -->
@@ -176,6 +184,28 @@ function toggle() { isOpen.value = !isOpen.value }
 const { week } = useDiet()
 const { getLog, upsertLog, swapMap, addSwap, deleteSwap } = useLog()
 
+// Pasto base (già considerando lo swap, ma senza alt)
+function resolveSwappedMeal(meal) {
+  const swap = swapMap.value[`${props.day.key}_${meal}`]
+  if (!swap) return props.day[meal]
+  const targetDay = week.value.find(d => d.key === swap.day)
+  return targetDay?.[swap.meal] ?? props.day[meal]
+}
+
+// Pasto effettivo: swap + scelta alt
+const effectiveLunch  = computed(() => {
+  const base = resolveSwappedMeal('lunch')
+  return (logForm.value.lunch_alt && base.alt) ? base.alt : base
+})
+const effectiveDinner = computed(() => {
+  const base = resolveSwappedMeal('dinner')
+  return (logForm.value.dinner_alt && base.alt) ? base.alt : base
+})
+
+// Il pasto base ha un'alternativa?
+const lunchHasAlt  = computed(() => !!resolveSwappedMeal('lunch').alt)
+const dinnerHasAlt = computed(() => !!resolveSwappedMeal('dinner').alt)
+
 const swapModal = ref(null) // null | 'lunch' | 'dinner'
 
 function openSwapModal(meal) { swapModal.value = meal }
@@ -204,6 +234,8 @@ const statuses = [
 const logForm = ref({
   breakfast_ok:  false,
   activity:      false,
+  lunch_alt:     false,
+  dinner_alt:    false,
   lunch_status:  null,
   dinner_status: null,
   notes:         '',
@@ -216,6 +248,8 @@ watch(() => getLog(props.dateStr), (log) => {
   logForm.value = {
     breakfast_ok:  log.breakfast_ok  ?? false,
     activity:      log.activity      ?? false,
+    lunch_alt:     log.lunch_alt     ?? false,
+    dinner_alt:    log.dinner_alt    ?? false,
     lunch_status:  log.lunch_status  ?? null,
     dinner_status: log.dinner_status ?? null,
     notes:         log.notes         ?? '',
@@ -227,6 +261,8 @@ async function saveLog() {
   await upsertLog(props.dateStr, {
     breakfast_ok:  logForm.value.breakfast_ok,
     activity:      logForm.value.activity,
+    lunch_alt:     logForm.value.lunch_alt,
+    dinner_alt:    logForm.value.dinner_alt,
     lunch_status:  logForm.value.lunch_status  || null,
     dinner_status: logForm.value.dinner_status || null,
     notes:         logForm.value.notes         || null,
@@ -236,6 +272,11 @@ async function saveLog() {
 
 function setStatus(field, value) {
   logForm.value[field] = logForm.value[field] === value ? null : value
+  saveLog()
+}
+
+function setAlt(field, value) {
+  logForm.value[field] = value
   saveLog()
 }
 </script>
@@ -383,6 +424,33 @@ function setStatus(field, value) {
   padding: 0 0.1rem;
 
   &:hover { color: var(--accent); }
+}
+
+// ── Alt selector ─────────────────────────────────────────────────────────────
+
+.alt-selector {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.alt-btn {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  border: 1px solid var(--cream-dark);
+  color: var(--ink-muted);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    border-color: var(--ink-muted);
+    color: var(--ink-soft);
+  }
+
+  &.active {
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+  }
 }
 
 // ── Colazione ─────────────────────────────────────────────────────────────────

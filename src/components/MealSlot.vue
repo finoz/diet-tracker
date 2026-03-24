@@ -29,27 +29,14 @@
       <div v-if="meal.notes" class="meal-notes">{{ meal.notes }}</div>
     </div>
 
-    <!-- Alternativa -->
-    <div v-if="meal.alt" class="meal-alt">
-      <button class="alt-toggle" @click="showAlt = !showAlt">
-        {{ showAlt ? '↑ nascondi' : '↓ alternativa' }}
-      </button>
-      <div v-if="showAlt" class="alt-body">
-        <MealSlot :meal="meal.alt" label="alt." />
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-
 defineProps({
   meal: { type: Object, required: true },
   label: { type: String, default: '' }
 })
-
-const showAlt = ref(false)
 </script>
 
 <style lang="scss" scoped>
@@ -128,21 +115,4 @@ const showAlt = ref(false)
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.meal-alt {
-  margin-top: 0.6rem;
-}
-
-.alt-toggle {
-  font-size: 0.7rem;
-  color: var(--ink-muted);
-  padding: 0;
-
-  &:hover {
-    color: var(--ink);
-  }
-}
-
-.alt-body {
-  margin-top: 0.4rem;
-}
 </style>
