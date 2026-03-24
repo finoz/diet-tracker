@@ -31,10 +31,14 @@
 import { computed } from 'vue'
 import { useLog } from '../composables/useLog'
 
-const { heatmapLevel } = useLog()
+const { heatmapLevel, dailyLogs } = useLog()
 
 // Genera 52 settimane × 7 giorni = 364 celle, come GitHub
 const cells = computed(() => {
+  // Dipendenza esplicita su dailyLogs: quando fetchLogsForYear completa
+  // e aggiorna dailyLogs.value, questo computed si ricalcola.
+  void dailyLogs.value
+
   const today = new Date()
   const result = []
   for (let i = 363; i >= 0; i--) {
