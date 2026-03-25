@@ -51,11 +51,7 @@
           <div class="section-label-row">
             <span class="section-label">pranzo</span>
             <div v-if="user" class="meal-swap-ctrl">
-              <template v-if="swapMap[`${day.key}_lunch`]">
-                <span class="swap-badge">↔ {{ dayLabel(swapMap[`${day.key}_lunch`].day) }} {{ mealLabel(swapMap[`${day.key}_lunch`].meal) }}</span>
-                <button class="swap-remove" @click.stop="removeSwap(swapMap[`${day.key}_lunch`].id)">×</button>
-              </template>
-              <button v-else class="swap-cta" @click.stop="openSwapModal('lunch')" title="scambia pasto">↔</button>
+              <button class="swap-cta" @click.stop="openSwapModal('lunch')" title="scambia pasto">↔</button>
             </div>
           </div>
           <div v-if="user && lunchHasAlt" class="alt-selector">
@@ -70,11 +66,7 @@
           <div class="section-label-row">
             <span class="section-label">cena</span>
             <div v-if="user" class="meal-swap-ctrl">
-              <template v-if="swapMap[`${day.key}_dinner`]">
-                <span class="swap-badge">↔ {{ dayLabel(swapMap[`${day.key}_dinner`].day) }} {{ mealLabel(swapMap[`${day.key}_dinner`].meal) }}</span>
-                <button class="swap-remove" @click.stop="removeSwap(swapMap[`${day.key}_dinner`].id)">×</button>
-              </template>
-              <button v-else class="swap-cta" @click.stop="openSwapModal('dinner')" title="scambia pasto">↔</button>
+              <button class="swap-cta" @click.stop="openSwapModal('dinner')" title="scambia pasto">↔</button>
             </div>
           </div>
           <div v-if="user && dinnerHasAlt" class="alt-selector">
@@ -162,15 +154,6 @@ const props = defineProps({
 })
 
 const DAYS_ORDER = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']
-const DAYS_IT_SHORT = {
-  monday: 'lun', tuesday: 'mar', wednesday: 'mer',
-  thursday: 'gio', friday: 'ven', saturday: 'sab', sunday: 'dom',
-}
-const MEAL_IT = { lunch: 'pranzo', dinner: 'cena' }
-
-function dayLabel(key)  { return DAYS_IT_SHORT[key] ?? key }
-function mealLabel(key) { return MEAL_IT[key] ?? key }
-
 const isPast = computed(() => {
   const todayIdx = DAYS_ORDER.indexOf(props.todayKey)
   const dayIdx   = DAYS_ORDER.indexOf(props.day.key)
@@ -183,15 +166,29 @@ function toggle() { isOpen.value = !isOpen.value }
 // ── Swap ──────────────────────────────────────────────────────────────────────
 
 const { week } = useDiet()
-const { getLog, upsertLog, swapMap, addSwap, deleteSwap } = useLog()
+const { getLog, upsertLog, swapMap, addSwap } = useLog()
 const { user } = useAuth()
 
-// Pasto base (già considerando lo swap, ma senza alt)
+// Segue la catena di swap (con rilevamento cicli)
 function resolveSwappedMeal(meal) {
-  const swap = swapMap.value[`${props.day.key}_${meal}`]
-  if (!swap) return props.day[meal]
-  const targetDay = week.value.find(d => d.key === swap.day)
-  return targetDay?.[swap.meal] ?? props.day[meal]
+  const visited = new Set()
+  let curDay = props.day.key
+  let curMeal = meal
+  let prevDay = curDay
+  let prevMeal = curMeal
+
+  while (true) {
+    const key = `${curDay}_${curMeal}`
+    if (visited.has(key)) { curDay = prevDay; curMeal = prevMeal; break }
+    const swap = swapMap.value[key]
+    if (!swap) break
+    visited.add(key)
+    prevDay = curDay; prevMeal = curMeal
+    curDay = swap.day; curMeal = swap.meal
+  }
+
+  const targetDay = week.value.find(d => d.key === curDay)
+  return targetDay?.[curMeal] ?? props.day[meal]
 }
 
 // Pasto effettivo: swap + scelta alt
@@ -220,10 +217,6 @@ async function onSwapConfirm({ dayB, mealB }) {
     mealB,
   })
   swapModal.value = null
-}
-
-async function removeSwap(id) {
-  await deleteSwap(id)
 }
 
 // ── Log ───────────────────────────────────────────────────────────────────────

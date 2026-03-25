@@ -22,6 +22,7 @@
       <aside class="sidebar">
         <WeekSwaps />
         <ProteinSummary v-if="user" :proteinSummary="proteinSummary" />
+        <CarbSummary v-if="user" :carbSummary="carbSummary" />
         <ActivityHeatmap v-if="user" />
       </aside>
     </div>
@@ -36,6 +37,7 @@ import { useLog } from '../composables/useLog.js'
 import { useAuth } from '../composables/useAuth.js'
 import DayCard from '../components/DayCard.vue'
 import ProteinSummary from '../components/ProteinSummary.vue'
+import CarbSummary from '../components/CarbSummary.vue'
 import ActivityHeatmap from '../components/ActivityHeatmap.vue'
 import WeekSwaps from '../components/WeekSwaps.vue'
 
@@ -43,23 +45,24 @@ const { week, todayKey, config } = useDiet()
 const { user } = useAuth()
 const { fetchLogsForYear, fetchSwapsForWeek, getWeekStart, swapMap, dailyLogs } = useLog()
 
+function resolveMealForSummary(day, mealKey) {
+  const swap = swapMap.value[`${day.key}_${mealKey}`]
+  let base = day[mealKey]
+  if (swap) {
+    const target = week.value.find(d => d.key === swap.day)
+    base = target?.[swap.meal] ?? day[mealKey]
+  }
+  const log = dailyLogs.value[day.dateStr]
+  const isAlt = log?.[`${mealKey}_alt`] ?? false
+  return (isAlt && base?.alt) ? base.alt : base
+}
+
 // proteinSummary che tiene conto di swap e scelte alt
 const proteinSummary = computed(() => {
   const counts = {}
   week.value.forEach(day => {
     ;['lunch', 'dinner'].forEach(mealKey => {
-      // applica swap
-      const swap = swapMap.value[`${day.key}_${mealKey}`]
-      let base = day[mealKey]
-      if (swap) {
-        const target = week.value.find(d => d.key === swap.day)
-        base = target?.[swap.meal] ?? day[mealKey]
-      }
-      // applica scelta alt
-      const log = dailyLogs.value[day.dateStr]
-      const isAlt = log?.[`${mealKey}_alt`] ?? false
-      const effective = (isAlt && base?.alt) ? base.alt : base
-
+      const effective = resolveMealForSummary(day, mealKey)
       if (effective?.protein) {
         counts[effective.protein] = (counts[effective.protein] || 0) + 1
       }
@@ -69,6 +72,22 @@ const proteinSummary = computed(() => {
     key, ...meta,
     count: counts[key] || 0,
   }))
+})
+
+// carbSummary che tiene conto di swap e scelte alt
+const carbSummary = computed(() => {
+  const counts = {}
+  week.value.forEach(day => {
+    ;['lunch', 'dinner'].forEach(mealKey => {
+      const effective = resolveMealForSummary(day, mealKey)
+      if (effective?.carb) {
+        counts[effective.carb] = (counts[effective.carb] || 0) + 1
+      }
+    })
+  })
+  return Object.entries(config.carbs)
+    .map(([key, meta]) => ({ key, ...meta, count: counts[key] || 0 }))
+    .filter(c => c.count > 0)
 })
 
 onMounted(async () => {

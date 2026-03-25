@@ -59,3 +59,16 @@
 .protein-range {
   color: var(--ink-muted);
 }
+
+// ─── Carb summary ─────────────────────────────────────────────────────────────
+
+.carb-summary {
+  @include card;
+}
+
+.carb-bar {
+  height: 100%;
+  background: var(--t2, #7ec8a4);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
