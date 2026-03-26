@@ -84,6 +84,13 @@ export function useLog() {
   async function addSwap({ dayA, mealA, dayB, mealB, notes = null }) {
     const ws = toDateStr(getWeekStart())
 
+    // Rimuovi swap esistenti che coinvolgono uno dei due slot
+    const slots = new Set([`${dayA}_${mealA}`, `${dayB}_${mealB}`])
+    const toDelete = weekSwaps.value.filter(s =>
+      slots.has(`${s.day_a}_${s.meal_a}`) || slots.has(`${s.day_b}_${s.meal_b}`)
+    )
+    for (const s of toDelete) await deleteSwap(s.id)
+
     const { data, error: err } = await supabase
       .from('week_swaps')
       .insert({
