@@ -74,18 +74,16 @@ const proteinSummary = computed(() => {
   }))
 })
 
-// carbSummary che tiene conto di swap e scelte alt
+// carbSummary dai log reali (lunch_carb / dinner_carb salvati per data)
 const carbSummary = computed(() => {
   const counts = {}
   week.value.forEach(day => {
-    ;['lunch', 'dinner'].forEach(mealKey => {
-      const effective = resolveMealForSummary(day, mealKey)
-      if (effective?.carb) {
-        counts[effective.carb] = (counts[effective.carb] || 0) + 1
-      }
-    })
+    const log = dailyLogs.value[day.dateStr]
+    if (log?.lunch_carb)  counts[log.lunch_carb]  = (counts[log.lunch_carb]  || 0) + 1
+    if (log?.dinner_carb) counts[log.dinner_carb] = (counts[log.dinner_carb] || 0) + 1
   })
   return Object.entries(config.carbs)
+    .filter(([key]) => key !== 'pane')
     .map(([key, meta]) => ({ key, ...meta, count: counts[key] || 0 }))
     .filter(c => c.count > 0)
 })

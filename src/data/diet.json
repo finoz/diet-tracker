@@ -6,22 +6,23 @@
   },
 
   "proteins": {
-    "pollo":    { "label": "Pollo/Tacchino", "g": null, "weekly_min": 2, "weekly_max": 5, "type": "carne_bianca" },
-    "manzo":    { "label": "Manzo/Vitello",    "g": 200, "weekly_min": 0, "weekly_max": 1, "type": "carne_rossa" },
+    "pollo":    { "label": "Carne bianca", "g": null, "weekly_min": 2, "weekly_max": 5, "type": "carne_bianca" },
+    "manzo":    { "label": "Carne rossa",  "g": 200, "weekly_min": 0, "weekly_max": 1, "type": "carne_rossa" },
     "pesce":    { "label": "Pesce",            "g": 225, "weekly_min": 2, "weekly_max": 4, "type": "pesce" },
-    "uova":     { "label": "Uova x2",          "g": null, "weekly_min": 0, "weekly_max": 2, "type": "uova" },
+    "uova":     { "label": "Uova",          "g": null, "weekly_min": 0, "weekly_max": 2, "type": "uova" },
     "legumi":   { "label": "Legumi",           "g": null, "weekly_min": 2, "weekly_max": null, "type": "legumi" },
     "ricotta":  { "label": "Formaggio fresco", "g": 90,  "weekly_min": 0, "weekly_max": 2, "type": "latticino" },
     "tofu":     { "label": "Tofu",             "g": 150, "weekly_min": 0, "weekly_max": 2, "type": "vegetale" }
   },
 
   "carbs": {
-    "pasta":     { "label": "Pasta",      "g": 80  },
-    "pasta_100": { "label": "Pasta",      "g": 100 },
-    "patate":    { "label": "Patate",      "g": 250 },
-    "riso":      { "label": "Riso",       "g": 80  },
-    "orzo_farro":{ "label": "Orzo/Farro", "g": 80  },
-    "pane":      { "label": "Pane",       "g": null }
+    "pasta":  { "label": "Pasta",   "g": "80-100" },
+    "riso":   { "label": "Riso",    "g": 80 },
+    "orzo":   { "label": "Orzo",    "g": 80 },
+    "farro":  { "label": "Farro",   "g": 80 },
+    "patate": { "label": "Patate",  "g": 250 },
+    "couscous": { "label": "Cous cous",  "g": 60 },
+    "pane":   { "label": "Pane",    "g": null }
   },
 
   "breakfasts": {
@@ -108,13 +109,11 @@
       "breakfast": "A",
       "lunch": {
         "pattern": "T1",
-        "carb": "riso",
         "protein": "pollo",
         "verdure_g": 200
       },
       "dinner": {
         "pattern": "T1",
-        "carb": "pasta",
         "protein": "pesce",
         "verdure_g": 225,
         "alt": {
@@ -129,21 +128,18 @@
       "breakfast": "D",
       "lunch": {
         "pattern": "T1",
-        "carb": "orzo_farro",
         "protein": "pollo",
         "protein_variants": ["100g salmone affumicato"],
         "verdure_g": 250
       },
       "dinner": {
         "pattern": "T1",
-        "carb": null,
-        "protein": "pollo",
+        "protein": "manzo",
         "verdure_g": 250,
         "pane": true,
         "alt": {
           "pattern": "T1",
-          "carb": null,
-          "protein": "manzo",
+          "protein": "pollo",
           "verdure_g": 250
         }
       }
@@ -152,7 +148,6 @@
       "breakfast": "B",
       "lunch": {
         "pattern": "T1",
-        "carb": "pasta_100",
         "protein": "pesce",
         "verdure_g": 250
       },
@@ -172,19 +167,15 @@
       "breakfast": "A",
       "lunch": {
         "pattern": "T1",
-        "carb": "pasta_100",
-        "carb_variants": ["patate:250g"],
         "protein": "ricotta",
         "verdure_g": 200
       },
       "dinner": {
         "pattern": "T1",
-        "carb": "riso",
         "protein": "pesce",
         "verdure_g": 225,
         "alt": {
           "pattern": "T1",
-          "carb": "riso",
           "protein": "pollo",
           "verdure_g": 200
         }
@@ -199,12 +190,10 @@
       },
       "dinner": {
         "pattern": "T1",
-        "carb": "pasta",
         "protein": "uova",
         "verdure_g": 225,
         "alt": {
           "pattern": "T1",
-          "carb": null,
           "protein": "pesce",
           "verdure_g": 225,
           "pane": true
@@ -215,9 +204,8 @@
       "breakfast": "C",
       "lunch": {
         "pattern": "T1",
-        "carb": "riso",
         "protein": "pollo",
-"verdure_g": 250,
+        "verdure_g": 250,
         "notes": "In alternativa: risotto con condimento a piacere + 250g verdure"
       },
       "dinner": {
@@ -237,7 +225,6 @@
         "pane": true,
         "alt": {
           "pattern": "T1",
-          "carb": null,
           "protein": "pesce",
           "verdure_g": 225
         }

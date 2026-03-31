@@ -58,7 +58,16 @@
             <button class="alt-btn" :class="{ active: !logForm.lunch_alt }" @click="setAlt('lunch_alt', false)">piano</button>
             <button class="alt-btn" :class="{ active: logForm.lunch_alt  }" @click="setAlt('lunch_alt', true)">alternativa</button>
           </div>
-          <MealSlot :meal="effectiveLunch" label="pranzo" />
+          <MealSlot :meal="effectiveLunch" label="pranzo" :selectedCarb="lunchCarbObj" />
+          <div v-if="user && effectiveLunch.patternKey === 'T1' && !effectiveLunch.pane" class="carb-selector">
+            <button
+              v-for="[key, carb] in selectableCarbs"
+              :key="key"
+              class="carb-btn"
+              :class="{ active: logForm.lunch_carb === key }"
+              @click="setCarb('lunch_carb', key)"
+            >{{ carb.label }}</button>
+          </div>
         </div>
 
         <!-- Cena -->
@@ -73,7 +82,16 @@
             <button class="alt-btn" :class="{ active: !logForm.dinner_alt }" @click="setAlt('dinner_alt', false)">piano</button>
             <button class="alt-btn" :class="{ active: logForm.dinner_alt  }" @click="setAlt('dinner_alt', true)">alternativa</button>
           </div>
-          <MealSlot :meal="effectiveDinner" label="cena" />
+          <MealSlot :meal="effectiveDinner" label="cena" :selectedCarb="dinnerCarbObj" />
+          <div v-if="user && effectiveDinner.patternKey === 'T1' && !effectiveDinner.pane" class="carb-selector">
+            <button
+              v-for="[key, carb] in selectableCarbs"
+              :key="key"
+              class="carb-btn"
+              :class="{ active: logForm.dinner_carb === key }"
+              @click="setCarb('dinner_carb', key)"
+            >{{ carb.label }}</button>
+          </div>
         </div>
 
         <!-- Log giornaliero -->
@@ -165,8 +183,22 @@ function toggle() { isOpen.value = !isOpen.value }
 
 // ── Swap ──────────────────────────────────────────────────────────────────────
 
-const { week } = useDiet()
+const { week, config } = useDiet()
 const { getLog, upsertLog, swapMap, addSwap } = useLog()
+
+// Carbs selezionabili (escluso pane, che è una voce separata)
+const selectableCarbs = computed(() =>
+  Object.entries(config.carbs).filter(([key]) => key !== 'pane')
+)
+
+function resolveCarb(key) {
+  if (!key) return null
+  const c = config.carbs[key]
+  return c ? { label: c.label, g: c.g } : null
+}
+
+const lunchCarbObj  = computed(() => resolveCarb(logForm.value.lunch_carb))
+const dinnerCarbObj = computed(() => resolveCarb(logForm.value.dinner_carb))
 const { user } = useAuth()
 
 // Segue la catena di swap (con rilevamento cicli)
@@ -233,6 +265,8 @@ const logForm = ref({
   dinner_alt:    false,
   lunch_status:  null,
   dinner_status: null,
+  lunch_carb:    null,
+  dinner_carb:   null,
   notes:         '',
 })
 
@@ -247,6 +281,8 @@ watch(() => getLog(props.dateStr), (log) => {
     dinner_alt:    log.dinner_alt    ?? false,
     lunch_status:  log.lunch_status  ?? null,
     dinner_status: log.dinner_status ?? null,
+    lunch_carb:    log.lunch_carb    ?? null,
+    dinner_carb:   log.dinner_carb   ?? null,
     notes:         log.notes         ?? '',
   }
 }, { immediate: true })
@@ -260,6 +296,8 @@ async function saveLog() {
     dinner_alt:    logForm.value.dinner_alt,
     lunch_status:  logForm.value.lunch_status  || null,
     dinner_status: logForm.value.dinner_status || null,
+    lunch_carb:    logForm.value.lunch_carb    || null,
+    dinner_carb:   logForm.value.dinner_carb   || null,
     notes:         logForm.value.notes         || null,
   })
   saving.value = false
@@ -272,6 +310,11 @@ function setStatus(field, value) {
 
 function setAlt(field, value) {
   logForm.value[field] = value
+  saveLog()
+}
+
+function setCarb(field, key) {
+  logForm.value[field] = logForm.value[field] === key ? null : key
   saveLog()
 }
 </script>

@@ -171,6 +171,35 @@
   }
 }
 
+// ── Carb selector ────────────────────────────────────────────────────────────
+
+.carb-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.15rem;
+}
+
+.carb-btn {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  border: 1px solid var(--cream-dark);
+  color: var(--ink-muted);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    border-color: var(--ink-muted);
+    color: var(--ink-soft);
+  }
+
+  &.active {
+    background: var(--t1);
+    color: white;
+    border-color: var(--t1);
+  }
+}
+
 // ── Colazione ─────────────────────────────────────────────────────────────────
 
 .breakfast-content { padding: 0.5rem 0; }

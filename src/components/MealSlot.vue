@@ -10,9 +10,10 @@
     </div>
 
     <div v-else class="meal-body">
-      <div v-if="meal.carbLabel" class="meal-item carb">
+      <div v-if="meal.patternKey === 'T1' && !meal.pane" class="meal-item carb">
         <span class="item-dot">●</span>
-        <span>{{ meal.carbLabel }}<em v-if="meal.carbG"> {{ meal.carbG }}g</em></span>
+        <span v-if="selectedCarb">{{ selectedCarb.label }}<em v-if="selectedCarb.g"> {{ selectedCarb.g }}g</em></span>
+        <span v-else class="carb-placeholder">carboidrato</span>
       </div>
       <div v-if="meal.proteinLabel" class="meal-item protein">
         <span class="item-dot">●</span>
@@ -34,7 +35,8 @@
 
 <script setup>
 defineProps({
-  meal: { type: Object, required: true },
-  label: { type: String, default: '' }
+  meal:        { type: Object, required: true },
+  label:       { type: String, default: '' },
+  selectedCarb: { type: Object, default: null }, // { label, g } dal log
 })
 </script>
