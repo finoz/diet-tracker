@@ -22,8 +22,8 @@
 
         <!-- Colazione -->
         <div class="section">
-          <div class="section-label">colazione</div>
           <div class="breakfast-content">
+            <div class="section-label">colazione</div>
             <span class="breakfast-name">{{ day.breakfast.label }}</span>
             <ul class="breakfast-items">
               <li v-for="c in day.breakfast.components" :key="c.item">
@@ -48,17 +48,15 @@
 
         <!-- Pranzo -->
         <div class="section">
-          <div class="section-label-row">
-            <span class="section-label">pranzo</span>
-            <div v-if="user" class="meal-swap-ctrl">
-              <button class="swap-cta" @click.stop="openSwapModal('lunch')" title="scambia pasto">↔</button>
-            </div>
-          </div>
           <div v-if="user && lunchHasAlt" class="alt-selector">
             <button class="alt-btn" :class="{ active: !logForm.lunch_alt }" @click="setAlt('lunch_alt', false)">piano</button>
             <button class="alt-btn" :class="{ active: logForm.lunch_alt  }" @click="setAlt('lunch_alt', true)">alternativa</button>
           </div>
-          <MealSlot :meal="effectiveLunch" label="pranzo" :selectedCarb="lunchCarbObj" />
+          <MealSlot :meal="effectiveLunch" label="pranzo" :selectedCarb="lunchCarbObj">
+            <template v-if="user" #actions>
+              <button class="swap-cta" @click.stop="openSwapModal('lunch')" title="scambia pasto">↔</button>
+            </template>
+          </MealSlot>
           <div v-if="user && effectiveLunch.patternKey === 'T1' && !effectiveLunch.pane" class="carb-selector">
             <button
               v-for="[key, carb] in selectableCarbs"
@@ -72,17 +70,15 @@
 
         <!-- Cena -->
         <div class="section">
-          <div class="section-label-row">
-            <span class="section-label">cena</span>
-            <div v-if="user" class="meal-swap-ctrl">
-              <button class="swap-cta" @click.stop="openSwapModal('dinner')" title="scambia pasto">↔</button>
-            </div>
-          </div>
           <div v-if="user && dinnerHasAlt" class="alt-selector">
-            <button class="alt-btn" :class="{ active: !logForm.dinner_alt }" @click="setAlt('dinner_alt', false)">piano</button>
+            <button class="alt-btn" :class="{ active: !logForm.dinner_alt }" @click="setAlt('dinner_alt', false)">standard</button>
             <button class="alt-btn" :class="{ active: logForm.dinner_alt  }" @click="setAlt('dinner_alt', true)">alternativa</button>
           </div>
-          <MealSlot :meal="effectiveDinner" label="cena" :selectedCarb="dinnerCarbObj" />
+          <MealSlot :meal="effectiveDinner" label="cena" :selectedCarb="dinnerCarbObj">
+            <template v-if="user" #actions>
+              <button class="swap-cta" @click.stop="openSwapModal('dinner')" title="scambia pasto">↔</button>
+            </template>
+          </MealSlot>
           <div v-if="user && effectiveDinner.patternKey === 'T1' && !effectiveDinner.pane" class="carb-selector">
             <button
               v-for="[key, carb] in selectableCarbs"

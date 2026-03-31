@@ -3,6 +3,7 @@
     <div class="meal-header">
       <span class="meal-label">{{ label }}</span>
       <span class="pattern-badge">{{ meal.patternKey }}</span>
+      <slot name="actions" />
     </div>
 
     <div v-if="meal.patternKey === 'T4'" class="meal-free">
