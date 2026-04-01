@@ -59,6 +59,7 @@
     color: var(--ink-muted);
     font-style: normal;
     font-size: 0.75rem;
+    padding-left: 0.5rem;
   }
 }
 
@@ -80,4 +81,33 @@
   margin-top: 0.3rem;
   padding-top: 0.3rem;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+// ── Proteina cliccabile ───────────────────────────────────────────────────────
+
+.protein-label-btn {
+  font-size: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border-bottom: 1px dashed var(--ink-muted);
+  line-height: 1.3;
+  transition: color 0.15s, border-color 0.15s;
+
+  em {
+    color: var(--ink-muted);
+    font-style: normal;
+    font-size: 0.75rem;
+    padding-left: 0.5rem;
+  }
+
+  &:hover {
+    color: var(--t1);
+    border-color: var(--t1);
+  }
+
+  &.is-overridden {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
 }

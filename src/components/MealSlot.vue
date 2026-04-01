@@ -16,9 +16,15 @@
         <span v-if="selectedCarb">{{ selectedCarb.label }}<em v-if="selectedCarb.g"> {{ selectedCarb.g }}g</em></span>
         <span v-else class="carb-placeholder">carboidrato</span>
       </div>
-      <div v-if="meal.proteinLabel" class="meal-item protein">
+      <div v-if="displayProteinLabel" class="meal-item protein">
         <span class="item-dot">●</span>
-        <span>{{ meal.proteinLabel }}<em v-if="meal.proteinG"> {{ meal.proteinG }}g</em></span>
+        <button
+          v-if="canChangeProtein"
+          class="protein-label-btn"
+          :class="{ 'is-overridden': overrideProteinLabel }"
+          @click.stop="$emit('change-protein')"
+        >{{ displayProteinLabel }}<em v-if="displayProteinG"> {{ displayProteinG }}g</em></button>
+        <span v-else>{{ displayProteinLabel }}<em v-if="displayProteinG"> {{ displayProteinG }}g</em></span>
       </div>
       <div class="meal-item verdure">
         <span class="item-dot">●</span>
@@ -35,9 +41,23 @@
 </template>
 
 <script setup>
-defineProps({
-  meal:        { type: Object, required: true },
-  label:       { type: String, default: '' },
-  selectedCarb: { type: Object, default: null }, // { label, g } dal log
+import { computed } from 'vue'
+
+const props = defineProps({
+  meal:                { type: Object, required: true },
+  label:               { type: String, default: '' },
+  selectedCarb:        { type: Object, default: null },  // { label, g } dal log
+  canChangeProtein:    { type: Boolean, default: false },
+  overrideProteinLabel: { type: String, default: null }, // label override dal log
+  overrideProteinG:    { type: [Number, String], default: null },
 })
+
+defineEmits(['change-protein'])
+
+const displayProteinLabel = computed(() =>
+  props.overrideProteinLabel ?? props.meal.proteinLabel
+)
+const displayProteinG = computed(() =>
+  props.overrideProteinLabel ? props.overrideProteinG : props.meal.proteinG
+)
 </script>

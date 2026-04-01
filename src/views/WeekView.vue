@@ -57,14 +57,17 @@ function resolveMealForSummary(day, mealKey) {
   return (isAlt && base?.alt) ? base.alt : base
 }
 
-// proteinSummary che tiene conto di swap e scelte alt
+// proteinSummary che tiene conto di swap, scelte alt e override proteina
 const proteinSummary = computed(() => {
   const counts = {}
   week.value.forEach(day => {
     ;['lunch', 'dinner'].forEach(mealKey => {
       const effective = resolveMealForSummary(day, mealKey)
-      if (effective?.protein) {
-        counts[effective.protein] = (counts[effective.protein] || 0) + 1
+      const log = dailyLogs.value[day.dateStr]
+      const override = log?.[`${mealKey}_protein`]
+      const protein = override || effective?.protein
+      if (protein) {
+        counts[protein] = (counts[protein] || 0) + 1
       }
     })
   })

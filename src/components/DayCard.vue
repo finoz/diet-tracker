@@ -52,7 +52,15 @@
             <button class="alt-btn" :class="{ active: !logForm.lunch_alt }" @click="setAlt('lunch_alt', false)">piano</button>
             <button class="alt-btn" :class="{ active: logForm.lunch_alt  }" @click="setAlt('lunch_alt', true)">alternativa</button>
           </div>
-          <MealSlot :meal="effectiveLunch" label="pranzo" :selectedCarb="lunchCarbObj">
+          <MealSlot
+            :meal="effectiveLunch"
+            label="pranzo"
+            :selectedCarb="lunchCarbObj"
+            :canChangeProtein="!!user && !!effectiveLunch.protein"
+            :overrideProteinLabel="lunchOverride?.label ?? null"
+            :overrideProteinG="lunchOverride?.g ?? null"
+            @change-protein="openProteinModal('lunch')"
+          >
             <template v-if="user" #actions>
               <button class="swap-cta" @click.stop="openSwapModal('lunch')" title="scambia pasto">↔</button>
             </template>
@@ -74,7 +82,15 @@
             <button class="alt-btn" :class="{ active: !logForm.dinner_alt }" @click="setAlt('dinner_alt', false)">standard</button>
             <button class="alt-btn" :class="{ active: logForm.dinner_alt  }" @click="setAlt('dinner_alt', true)">alternativa</button>
           </div>
-          <MealSlot :meal="effectiveDinner" label="cena" :selectedCarb="dinnerCarbObj">
+          <MealSlot
+            :meal="effectiveDinner"
+            label="cena"
+            :selectedCarb="dinnerCarbObj"
+            :canChangeProtein="!!user && !!effectiveDinner.protein"
+            :overrideProteinLabel="dinnerOverride?.label ?? null"
+            :overrideProteinG="dinnerOverride?.g ?? null"
+            @change-protein="openProteinModal('dinner')"
+          >
             <template v-if="user" #actions>
               <button class="swap-cta" @click.stop="openSwapModal('dinner')" title="scambia pasto">↔</button>
             </template>
@@ -150,6 +166,16 @@
       @close="swapModal = null"
     />
 
+    <!-- Modal proteina -->
+    <ProteinPickerModal
+      v-if="proteinModal"
+      :meal="proteinModal"
+      :planned="plannedProteinKey(proteinModal === 'lunch' ? effectiveLunch : effectiveDinner)"
+      :current="logForm[`${proteinModal}_protein`] ?? plannedProteinKey(proteinModal === 'lunch' ? effectiveLunch : effectiveDinner)"
+      @confirm="onProteinConfirm"
+      @close="proteinModal = null"
+    />
+
   </div>
 </template>
 
@@ -157,6 +183,7 @@
 import { ref, computed, watch } from 'vue'
 import MealSlot from './MealSlot.vue'
 import SwapPickerModal from './SwapPickerModal.vue'
+import ProteinPickerModal from './ProteinPickerModal.vue'
 import { useLog } from '../composables/useLog.js'
 import { useDiet } from '../composables/useDiet.js'
 import { useAuth } from '../composables/useAuth.js'
@@ -233,9 +260,35 @@ const effectiveDinner = computed(() => {
 const lunchHasAlt  = computed(() => !!resolveSwappedMeal('lunch').alt)
 const dinnerHasAlt = computed(() => !!resolveSwappedMeal('dinner').alt)
 
-const swapModal = ref(null) // null | 'lunch' | 'dinner'
+const swapModal    = ref(null) // null | 'lunch' | 'dinner'
+const proteinModal = ref(null) // null | 'lunch' | 'dinner'
 
-function openSwapModal(meal) { swapModal.value = meal }
+function openSwapModal(meal)    { swapModal.value = meal }
+function openProteinModal(meal) { proteinModal.value = meal }
+
+// Proteina pianificata (chiave) per un pasto effettivo
+function plannedProteinKey(mealObj) {
+  return mealObj?.protein ?? null
+}
+
+// Proteina override risolta: { label, g } o null
+function resolveOverrideProtein(overrideKey) {
+  if (!overrideKey) return null
+  const p = config.proteins[overrideKey]
+  return p ? { label: p.label, g: p.g } : null
+}
+
+const lunchOverride  = computed(() => resolveOverrideProtein(logForm.value.lunch_protein))
+const dinnerOverride = computed(() => resolveOverrideProtein(logForm.value.dinner_protein))
+
+function onProteinConfirm(key) {
+  const meal = proteinModal.value
+  const planned = plannedProteinKey(meal === 'lunch' ? effectiveLunch.value : effectiveDinner.value)
+  // Se si ri-seleziona la proteina pianificata, rimuovi l'override
+  logForm.value[`${meal}_protein`] = key === planned ? null : key
+  saveLog()
+  proteinModal.value = null
+}
 
 async function onSwapConfirm({ dayB, mealB }) {
   await addSwap({
@@ -255,15 +308,17 @@ const statuses = [
 ]
 
 const logForm = ref({
-  breakfast_ok:  false,
-  activity:      false,
-  lunch_alt:     false,
-  dinner_alt:    false,
-  lunch_status:  null,
-  dinner_status: null,
-  lunch_carb:    null,
-  dinner_carb:   null,
-  notes:         '',
+  breakfast_ok:   false,
+  activity:       false,
+  lunch_alt:      false,
+  dinner_alt:     false,
+  lunch_status:   null,
+  dinner_status:  null,
+  lunch_carb:     null,
+  dinner_carb:    null,
+  lunch_protein:  null,
+  dinner_protein: null,
+  notes:          '',
 })
 
 const saving = ref(false)
@@ -271,30 +326,34 @@ const saving = ref(false)
 watch(() => getLog(props.dateStr), (log) => {
   if (!log) return
   logForm.value = {
-    breakfast_ok:  log.breakfast_ok  ?? false,
-    activity:      log.activity      ?? false,
-    lunch_alt:     log.lunch_alt     ?? false,
-    dinner_alt:    log.dinner_alt    ?? false,
-    lunch_status:  log.lunch_status  ?? null,
-    dinner_status: log.dinner_status ?? null,
-    lunch_carb:    log.lunch_carb    ?? null,
-    dinner_carb:   log.dinner_carb   ?? null,
-    notes:         log.notes         ?? '',
+    breakfast_ok:   log.breakfast_ok   ?? false,
+    activity:       log.activity       ?? false,
+    lunch_alt:      log.lunch_alt      ?? false,
+    dinner_alt:     log.dinner_alt     ?? false,
+    lunch_status:   log.lunch_status   ?? null,
+    dinner_status:  log.dinner_status  ?? null,
+    lunch_carb:     log.lunch_carb     ?? null,
+    dinner_carb:    log.dinner_carb    ?? null,
+    lunch_protein:  log.lunch_protein  ?? null,
+    dinner_protein: log.dinner_protein ?? null,
+    notes:          log.notes          ?? '',
   }
 }, { immediate: true })
 
 async function saveLog() {
   saving.value = true
   await upsertLog(props.dateStr, {
-    breakfast_ok:  logForm.value.breakfast_ok,
-    activity:      logForm.value.activity,
-    lunch_alt:     logForm.value.lunch_alt,
-    dinner_alt:    logForm.value.dinner_alt,
-    lunch_status:  logForm.value.lunch_status  || null,
-    dinner_status: logForm.value.dinner_status || null,
-    lunch_carb:    logForm.value.lunch_carb    || null,
-    dinner_carb:   logForm.value.dinner_carb   || null,
-    notes:         logForm.value.notes         || null,
+    breakfast_ok:   logForm.value.breakfast_ok,
+    activity:       logForm.value.activity,
+    lunch_alt:      logForm.value.lunch_alt,
+    dinner_alt:     logForm.value.dinner_alt,
+    lunch_status:   logForm.value.lunch_status   || null,
+    dinner_status:  logForm.value.dinner_status  || null,
+    lunch_carb:     logForm.value.lunch_carb     || null,
+    dinner_carb:    logForm.value.dinner_carb    || null,
+    lunch_protein:  logForm.value.lunch_protein  || null,
+    dinner_protein: logForm.value.dinner_protein || null,
+    notes:          logForm.value.notes          || null,
   })
   saving.value = false
 }
