@@ -6,23 +6,26 @@
   },
 
   "proteins": {
-    "pollo":    { "label": "Carne bianca", "g": null, "weekly_min": 2, "weekly_max": 5, "type": "carne_bianca" },
-    "manzo":    { "label": "Carne rossa",  "g": 200, "weekly_min": 0, "weekly_max": 1, "type": "carne_rossa" },
-    "pesce":    { "label": "Pesce",            "g": 225, "weekly_min": 2, "weekly_max": 4, "type": "pesce" },
-    "uova":     { "label": "Uova",          "g": null, "weekly_min": 0, "weekly_max": 2, "type": "uova" },
-    "legumi":   { "label": "Legumi",           "g": null, "weekly_min": 2, "weekly_max": null, "type": "legumi" },
-    "ricotta":  { "label": "Formaggio fresco", "g": 90,  "weekly_min": 0, "weekly_max": 2, "type": "latticino" },
-    "tofu":     { "label": "Tofu",             "g": 150, "weekly_min": 0, "weekly_max": 2, "type": "vegetale" }
+    "pollo":    { "label": "Carne bianca",     "g": null, "weekly_min": 2, "weekly_max": 5,    "type": "carne_bianca" },
+    "manzo":    { "label": "Carne rossa",       "g": 200,  "weekly_min": 0, "weekly_max": 1,    "type": "carne_rossa" },
+    "maiale":   { "label": "Carne di maiale",   "g": null, "weekly_min": 0, "weekly_max": null, "type": "carne_rossa" },
+    "pesce":    { "label": "Pesce",             "g": 225,  "weekly_min": 2, "weekly_max": 4,    "type": "pesce" },
+    "uova":     { "label": "Uova",              "g": null, "weekly_min": 0, "weekly_max": 2,    "type": "uova" },
+    "legumi":   { "label": "Legumi",            "g": null, "weekly_min": 2, "weekly_max": null, "type": "legumi" },
+    "ricotta":  { "label": "Formaggio fresco",  "g": 90,   "weekly_min": 0, "weekly_max": 2,    "type": "latticino" },
+    "formaggi": { "label": "Formaggi",          "g": null, "weekly_min": 0, "weekly_max": null, "type": "latticino" },
+    "tofu":     { "label": "Tofu",              "g": 150,  "weekly_min": 0, "weekly_max": 2,    "type": "vegetale" }
   },
 
   "carbs": {
-    "pasta":  { "label": "Pasta",   "g": "80-100" },
-    "riso":   { "label": "Riso",    "g": 80 },
-    "orzo":   { "label": "Orzo",    "g": 80 },
-    "farro":  { "label": "Farro",   "g": 80 },
-    "patate": { "label": "Patate",  "g": 250 },
+    "pasta":    { "label": "Pasta",      "g": "80-100" },
+    "riso":     { "label": "Riso",       "g": 80 },
+    "orzo":     { "label": "Orzo",       "g": 80 },
+    "farro":    { "label": "Farro",      "g": 80 },
+    "patate":   { "label": "Patate",     "g": 250 },
     "couscous": { "label": "Cous cous",  "g": 60 },
-    "pane":   { "label": "Pane",    "g": 80 }
+    "pane":     { "label": "Pane",       "g": 80 },
+    "pizza":    { "label": "Pizza",      "g": null }
   },
 
   "breakfasts": {

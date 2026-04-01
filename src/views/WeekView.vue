@@ -8,7 +8,11 @@
       </div>
     </div>
 
-    <div class="layout">
+    <div v-if="loading" class="week-loading">
+      <div v-for="n in 7" :key="n" class="week-loading-card"></div>
+    </div>
+
+    <div v-else class="layout">
       <div class="days-column">
         <DayCard
           v-for="day in week"
@@ -45,7 +49,7 @@ import NutritionHistory from '../components/NutritionHistory.vue'
 
 const { week, todayKey, config } = useDiet()
 const { user } = useAuth()
-const { fetchLogsForYear, fetchSwapsForWeek, getWeekStart, swapMap, dailyLogs } = useLog()
+const { fetchLogsForYear, fetchSwapsForWeek, getWeekStart, swapMap, dailyLogs, loading } = useLog()
 
 function resolveMealForSummary(day, mealKey) {
   const swap = swapMap.value[`${day.key}_${mealKey}`]
@@ -59,25 +63,31 @@ function resolveMealForSummary(day, mealKey) {
   return (isAlt && base?.alt) ? base.alt : base
 }
 
-// proteinSummary: planned = piano della settimana (swap + alt), logged = solo pasti con status
+// proteinSummary: planned = piano della settimana (swap + alt), logged = pasti con status + free meals
 const proteinSummary = computed(() => {
   const planned = {}
   const logged  = {}
 
   week.value.forEach(day => {
+    const log = dailyLogs.value[day.dateStr]
     ;['lunch', 'dinner'].forEach(mealKey => {
       const effective = resolveMealForSummary(day, mealKey)
-      const log       = dailyLogs.value[day.dateStr]
       const override  = log?.[`${mealKey}_protein`]
+      const isFree    = effective?.patternKey === 'T4'
 
-      // pianificato: proteina effettiva del pasto (con swap/alt), per tutti i 7 giorni
-      const plannedProtein = override || effective?.protein
-      if (plannedProtein) planned[plannedProtein] = (planned[plannedProtein] || 0) + 1
-
-      // loggato: solo se il pasto ha uno status registrato
-      if (log?.[`${mealKey}_status`] != null) {
-        const loggedProtein = override || effective?.protein
-        if (loggedProtein) logged[loggedProtein] = (logged[loggedProtein] || 0) + 1
+      if (!isFree) {
+        // Pasto strutturato: planned sempre, logged solo se ha status
+        const protein = override || effective?.protein
+        if (protein) planned[protein] = (planned[protein] || 0) + 1
+        if (log?.[`${mealKey}_status`] != null && protein) {
+          logged[protein] = (logged[protein] || 0) + 1
+        }
+      } else {
+        // Pasto libero: planned non conta, logged solo da free_proteins
+        const freeProteins = log?.[`${mealKey}_free_proteins`] ?? []
+        for (const p of freeProteins) {
+          logged[p] = (logged[p] || 0) + 1
+        }
       }
     })
   })
@@ -91,13 +101,21 @@ const proteinSummary = computed(() => {
     }))
 })
 
-// carbSummary dai log reali (lunch_carb / dinner_carb salvati per data)
+// carbSummary: log strutturati + free meals
 const carbSummary = computed(() => {
   const counts = {}
   week.value.forEach(day => {
     const log = dailyLogs.value[day.dateStr]
-    if (log?.lunch_carb)  counts[log.lunch_carb]  = (counts[log.lunch_carb]  || 0) + 1
-    if (log?.dinner_carb) counts[log.dinner_carb] = (counts[log.dinner_carb] || 0) + 1
+    if (!log) return
+    ;['lunch', 'dinner'].forEach(mealKey => {
+      // Carb da pasto strutturato
+      const carb = log[`${mealKey}_carb`]
+      if (carb) counts[carb] = (counts[carb] || 0) + 1
+      // Carb da pasto libero (multi)
+      for (const c of (log[`${mealKey}_free_carbs`] ?? [])) {
+        counts[c] = (counts[c] || 0) + 1
+      }
+    })
   })
   return Object.entries(config.carbs)
     .filter(([key]) => key !== 'pane')

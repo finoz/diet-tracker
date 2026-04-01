@@ -201,6 +201,60 @@
   }
 }
 
+// ── Free meal log ─────────────────────────────────────────────────────────────
+
+.free-log-label {
+  @include label-xs;
+  margin-top: 0.5rem;
+}
+
+.free-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.free-selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.free-selector-hint {
+  font-size: 0.62rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 500;
+}
+
+.free-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.free-chip {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  border: 1px solid var(--cream-dark);
+  color: var(--ink-muted);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    border-color: var(--ink-muted);
+    color: var(--ink-soft);
+  }
+
+  &.active {
+    background: var(--t4-soft);
+    color: var(--t4);
+    border-color: var(--t4);
+  }
+}
+
 // ── Colazione ─────────────────────────────────────────────────────────────────
 
 .breakfast-content {

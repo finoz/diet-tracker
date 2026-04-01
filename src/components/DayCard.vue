@@ -8,7 +8,7 @@
       </div>
       <div class="day-summary">
         <span class="summary-pill" :class="`pattern-${effectiveLunch.patternKey}`">
-          {{ effectiveLunch.proteinLabel || 'Legumi' }}
+          {{ effectiveLunch.patternKey === 'T4' ? 'libero' : (effectiveLunch.proteinLabel || effectiveLunch.patternKey) }}
         </span>
         <span class="summary-pill" :class="`pattern-${effectiveDinner.patternKey}`">
           {{ effectiveDinner.patternKey === 'T4' ? 'libero' : (effectiveDinner.proteinLabel || effectiveDinner.patternKey) }}
@@ -74,6 +74,34 @@
               @click="setCarb('lunch_carb', key)"
             >{{ carb.label }}</button>
           </div>
+          <!-- Pasto libero: log proteine e carbo -->
+          <template v-if="user && effectiveLunch.patternKey === 'T4'">
+            <div class="free-log-label">cosa hai mangiato?</div>
+            <div class="free-selector">
+              <div class="free-selector-group">
+                <span class="free-selector-hint">proteine</span>
+                <div class="free-chips">
+                  <button
+                    v-for="[key, p] in allProteins" :key="key"
+                    class="free-chip"
+                    :class="{ active: logForm.lunch_free_proteins.includes(key) }"
+                    @click="toggleFreeItem('lunch_free_proteins', key)"
+                  >{{ p.label }}</button>
+                </div>
+              </div>
+              <div class="free-selector-group">
+                <span class="free-selector-hint">carboidrati</span>
+                <div class="free-chips">
+                  <button
+                    v-for="[key, c] in allCarbs" :key="key"
+                    class="free-chip"
+                    :class="{ active: logForm.lunch_free_carbs.includes(key) }"
+                    @click="toggleFreeItem('lunch_free_carbs', key)"
+                  >{{ c.label }}</button>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
 
         <!-- Cena -->
@@ -104,6 +132,34 @@
               @click="setCarb('dinner_carb', key)"
             >{{ carb.label }}</button>
           </div>
+          <!-- Pasto libero: log proteine e carbo -->
+          <template v-if="user && effectiveDinner.patternKey === 'T4'">
+            <div class="free-log-label">cosa hai mangiato?</div>
+            <div class="free-selector">
+              <div class="free-selector-group">
+                <span class="free-selector-hint">proteine</span>
+                <div class="free-chips">
+                  <button
+                    v-for="[key, p] in allProteins" :key="key"
+                    class="free-chip"
+                    :class="{ active: logForm.dinner_free_proteins.includes(key) }"
+                    @click="toggleFreeItem('dinner_free_proteins', key)"
+                  >{{ p.label }}</button>
+                </div>
+              </div>
+              <div class="free-selector-group">
+                <span class="free-selector-hint">carboidrati</span>
+                <div class="free-chips">
+                  <button
+                    v-for="[key, c] in allCarbs" :key="key"
+                    class="free-chip"
+                    :class="{ active: logForm.dinner_free_carbs.includes(key) }"
+                    @click="toggleFreeItem('dinner_free_carbs', key)"
+                  >{{ c.label }}</button>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
 
         <!-- Log giornaliero -->
@@ -308,17 +364,21 @@ const statuses = [
 ]
 
 const logForm = ref({
-  breakfast_ok:   false,
-  activity:       false,
-  lunch_alt:      false,
-  dinner_alt:     false,
-  lunch_status:   null,
-  dinner_status:  null,
-  lunch_carb:     null,
-  dinner_carb:    null,
-  lunch_protein:  null,
-  dinner_protein: null,
-  notes:          '',
+  breakfast_ok:         false,
+  activity:             false,
+  lunch_alt:            false,
+  dinner_alt:           false,
+  lunch_status:         null,
+  dinner_status:        null,
+  lunch_carb:           null,
+  dinner_carb:          null,
+  lunch_protein:        null,
+  dinner_protein:       null,
+  lunch_free_proteins:  [],
+  dinner_free_proteins: [],
+  lunch_free_carbs:     [],
+  dinner_free_carbs:    [],
+  notes:                '',
 })
 
 const saving = ref(false)
@@ -326,37 +386,57 @@ const saving = ref(false)
 watch(() => getLog(props.dateStr), (log) => {
   if (!log) return
   logForm.value = {
-    breakfast_ok:   log.breakfast_ok   ?? false,
-    activity:       log.activity       ?? false,
-    lunch_alt:      log.lunch_alt      ?? false,
-    dinner_alt:     log.dinner_alt     ?? false,
-    lunch_status:   log.lunch_status   ?? null,
-    dinner_status:  log.dinner_status  ?? null,
-    lunch_carb:     log.lunch_carb     ?? null,
-    dinner_carb:    log.dinner_carb    ?? null,
-    lunch_protein:  log.lunch_protein  ?? null,
-    dinner_protein: log.dinner_protein ?? null,
-    notes:          log.notes          ?? '',
+    breakfast_ok:         log.breakfast_ok         ?? false,
+    activity:             log.activity             ?? false,
+    lunch_alt:            log.lunch_alt            ?? false,
+    dinner_alt:           log.dinner_alt           ?? false,
+    lunch_status:         log.lunch_status         ?? null,
+    dinner_status:        log.dinner_status        ?? null,
+    lunch_carb:           log.lunch_carb           ?? null,
+    dinner_carb:          log.dinner_carb          ?? null,
+    lunch_protein:        log.lunch_protein        ?? null,
+    dinner_protein:       log.dinner_protein       ?? null,
+    lunch_free_proteins:  log.lunch_free_proteins  ?? [],
+    dinner_free_proteins: log.dinner_free_proteins ?? [],
+    lunch_free_carbs:     log.lunch_free_carbs     ?? [],
+    dinner_free_carbs:    log.dinner_free_carbs    ?? [],
+    notes:                log.notes                ?? '',
   }
 }, { immediate: true })
 
 async function saveLog() {
   saving.value = true
   await upsertLog(props.dateStr, {
-    breakfast_ok:   logForm.value.breakfast_ok,
-    activity:       logForm.value.activity,
-    lunch_alt:      logForm.value.lunch_alt,
-    dinner_alt:     logForm.value.dinner_alt,
-    lunch_status:   logForm.value.lunch_status   || null,
-    dinner_status:  logForm.value.dinner_status  || null,
-    lunch_carb:     logForm.value.lunch_carb     || null,
-    dinner_carb:    logForm.value.dinner_carb    || null,
-    lunch_protein:  logForm.value.lunch_protein  || null,
-    dinner_protein: logForm.value.dinner_protein || null,
-    notes:          logForm.value.notes          || null,
+    breakfast_ok:         logForm.value.breakfast_ok,
+    activity:             logForm.value.activity,
+    lunch_alt:            logForm.value.lunch_alt,
+    dinner_alt:           logForm.value.dinner_alt,
+    lunch_status:         logForm.value.lunch_status         || null,
+    dinner_status:        logForm.value.dinner_status        || null,
+    lunch_carb:           logForm.value.lunch_carb           || null,
+    dinner_carb:          logForm.value.dinner_carb          || null,
+    lunch_protein:        logForm.value.lunch_protein        || null,
+    dinner_protein:       logForm.value.dinner_protein       || null,
+    lunch_free_proteins:  logForm.value.lunch_free_proteins.length  ? logForm.value.lunch_free_proteins  : null,
+    dinner_free_proteins: logForm.value.dinner_free_proteins.length ? logForm.value.dinner_free_proteins : null,
+    lunch_free_carbs:     logForm.value.lunch_free_carbs.length     ? logForm.value.lunch_free_carbs     : null,
+    dinner_free_carbs:    logForm.value.dinner_free_carbs.length    ? logForm.value.dinner_free_carbs    : null,
+    notes:                logForm.value.notes                || null,
   })
   saving.value = false
 }
+
+function toggleFreeItem(field, key) {
+  const arr = [...(logForm.value[field] ?? [])]
+  const idx = arr.indexOf(key)
+  if (idx >= 0) arr.splice(idx, 1)
+  else arr.push(key)
+  logForm.value[field] = arr
+  saveLog()
+}
+
+const allProteins = computed(() => Object.entries(config.proteins))
+const allCarbs    = computed(() => Object.entries(config.carbs))
 
 function setStatus(field, value) {
   logForm.value[field] = logForm.value[field] === value ? null : value

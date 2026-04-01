@@ -89,23 +89,26 @@ const PERIODS = [
 // ── Colori ────────────────────────────────────────────────────────────────────
 
 const PROTEIN_COLORS = {
-  pollo:   '#ECCBD9',
-  manzo:   '#B24C63',
-  pesce:   '#25CED1',
-  uova:    '#F5F3BB',
-  legumi:  '#548C2F',
-  ricotta: '#E8D5C4',  // beige caldo
-  tofu:    '#A8C5A0',  // verde salvia
+  pollo:    '#ECCBD9',
+  manzo:    '#B24C63',
+  maiale:   '#E8829A',
+  pesce:    '#25CED1',
+  uova:     '#F5F3BB',
+  legumi:   '#548C2F',
+  ricotta:  '#E8D5C4',
+  formaggi: '#C9A96E',
+  tofu:     '#A8C5A0',
 }
 
 const CARB_COLORS = {
   pasta:    '#EBEBEB',
   riso:     '#ECD644',
-  orzo:     '#F7B801',  // ambra brillante
-  farro:    '#C68642',  // ambra scura / brunita
+  orzo:     '#F7B801',
+  farro:    '#C68642',
   pane:     '#3590F3',
   couscous: '#E4572E',
   patate:   '#DDDDDD',
+  pizza:    '#FF6B6B',
 }
 
 // ── Helpers date ──────────────────────────────────────────────────────────────
@@ -159,17 +162,26 @@ const totals = computed(() => {
     if (cutoffStr && dateStr < cutoffStr) continue
     const dayKey = getDayKey(dateStr)
 
-    if (log.lunch_status != null) {
-      const p = getProtein(dayKey, 'lunch', log)
-      if (p) proteins[p] = (proteins[p] || 0) + 1
-      if (log.lunch_carb) carbs[log.lunch_carb] = (carbs[log.lunch_carb] || 0) + 1
-    }
+    ;['lunch', 'dinner'].forEach(mealKey => {
+      const slot   = config.week[dayKey]?.[mealKey]
+      const isFree = slot?.pattern === 'T4'
 
-    if (log.dinner_status != null) {
-      const p = getProtein(dayKey, 'dinner', log)
-      if (p) proteins[p] = (proteins[p] || 0) + 1
-      if (log.dinner_carb) carbs[log.dinner_carb] = (carbs[log.dinner_carb] || 0) + 1
-    }
+      if (!isFree) {
+        if (log[`${mealKey}_status`] != null) {
+          const p = getProtein(dayKey, mealKey, log)
+          if (p) proteins[p] = (proteins[p] || 0) + 1
+          const carb = log[`${mealKey}_carb`]
+          if (carb) carbs[carb] = (carbs[carb] || 0) + 1
+        }
+      } else {
+        for (const p of (log[`${mealKey}_free_proteins`] ?? [])) {
+          proteins[p] = (proteins[p] || 0) + 1
+        }
+        for (const c of (log[`${mealKey}_free_carbs`] ?? [])) {
+          carbs[c] = (carbs[c] || 0) + 1
+        }
+      }
+    })
   }
 
   return { proteins, carbs }
