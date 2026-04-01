@@ -24,6 +24,7 @@
         <ProteinSummary v-if="user" :proteinSummary="proteinSummary" />
         <CarbSummary v-if="user" :carbSummary="carbSummary" />
         <ActivityHeatmap v-if="user" />
+        <NutritionHistory v-if="user" />
       </aside>
     </div>
 
@@ -40,6 +41,7 @@ import ProteinSummary from '../components/ProteinSummary.vue'
 import CarbSummary from '../components/CarbSummary.vue'
 import ActivityHeatmap from '../components/ActivityHeatmap.vue'
 import WeekSwaps from '../components/WeekSwaps.vue'
+import NutritionHistory from '../components/NutritionHistory.vue'
 
 const { week, todayKey, config } = useDiet()
 const { user } = useAuth()
