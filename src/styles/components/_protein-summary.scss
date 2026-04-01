@@ -37,6 +37,7 @@
 }
 
 .protein-bar-wrap {
+  position: relative;
   height: 4px;
   background: var(--cream-dark);
   border-radius: 2px;
@@ -44,20 +45,38 @@
 }
 
 .protein-bar {
+  position: absolute;
+  top: 0; left: 0;
   height: 100%;
-  background: var(--t1);
   border-radius: 2px;
   transition: width 0.4s ease;
+
+  &--planned {
+    background: var(--t1);
+    opacity: 0.2;
+  }
+
+  &--logged {
+    background: var(--t1);
+    opacity: 1;
+  }
 }
 
 .protein-count {
   font-size: 0.78rem;
   color: var(--ink-soft);
   text-align: right;
+  white-space: nowrap;
+}
+
+.protein-planned-count {
+  color: var(--ink-muted);
+  font-size: 0.72rem;
 }
 
 .protein-range {
   color: var(--ink-muted);
+  font-size: 0.7rem;
 }
 
 // ─── Carb summary ─────────────────────────────────────────────────────────────

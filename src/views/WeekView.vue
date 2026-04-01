@@ -59,24 +59,36 @@ function resolveMealForSummary(day, mealKey) {
   return (isAlt && base?.alt) ? base.alt : base
 }
 
-// proteinSummary che tiene conto di swap, scelte alt e override proteina
+// proteinSummary: planned = piano della settimana (swap + alt), logged = solo pasti con status
 const proteinSummary = computed(() => {
-  const counts = {}
+  const planned = {}
+  const logged  = {}
+
   week.value.forEach(day => {
     ;['lunch', 'dinner'].forEach(mealKey => {
       const effective = resolveMealForSummary(day, mealKey)
-      const log = dailyLogs.value[day.dateStr]
-      const override = log?.[`${mealKey}_protein`]
-      const protein = override || effective?.protein
-      if (protein) {
-        counts[protein] = (counts[protein] || 0) + 1
+      const log       = dailyLogs.value[day.dateStr]
+      const override  = log?.[`${mealKey}_protein`]
+
+      // pianificato: proteina effettiva del pasto (con swap/alt), per tutti i 7 giorni
+      const plannedProtein = override || effective?.protein
+      if (plannedProtein) planned[plannedProtein] = (planned[plannedProtein] || 0) + 1
+
+      // loggato: solo se il pasto ha uno status registrato
+      if (log?.[`${mealKey}_status`] != null) {
+        const loggedProtein = override || effective?.protein
+        if (loggedProtein) logged[loggedProtein] = (logged[loggedProtein] || 0) + 1
       }
     })
   })
-  return Object.entries(config.proteins).map(([key, meta]) => ({
-    key, ...meta,
-    count: counts[key] || 0,
-  }))
+
+  return Object.entries(config.proteins)
+    .filter(([key]) => (planned[key] || 0) > 0 || (logged[key] || 0) > 0)
+    .map(([key, meta]) => ({
+      key, ...meta,
+      planned: planned[key] || 0,
+      logged:  logged[key]  || 0,
+    }))
 })
 
 // carbSummary dai log reali (lunch_carb / dinner_carb salvati per data)
