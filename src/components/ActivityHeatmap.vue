@@ -15,7 +15,7 @@
         <span class="legend-dot level-3"></span> ok + attività
       </span>
     </div>
-    <div class="heatmap-grid">
+    <div class="heatmap-grid" ref="gridEl">
       <div
         v-for="cell in cells"
         class="heatmap-cell"
@@ -28,10 +28,15 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useLog } from '../composables/useLog'
 
 const { heatmapLevel, dailyLogs } = useLog()
+
+const gridEl = ref(null)
+onMounted(() => {
+  if (gridEl.value) gridEl.value.scrollLeft = gridEl.value.scrollWidth
+})
 
 // Genera 52 settimane × 7 giorni = 364 celle, come GitHub
 const cells = computed(() => {
