@@ -84,7 +84,7 @@
   gap: 1rem;
   border-top: 1px solid var(--cream-dark);
 
-  @include respond-to('sm') { padding: 0 1rem 1rem; }
+  @include respond-to('sm') { padding: 1rem; }
 }
 
 .section {

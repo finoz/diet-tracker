@@ -22,7 +22,7 @@
     "farro":  { "label": "Farro",   "g": 80 },
     "patate": { "label": "Patate",  "g": 250 },
     "couscous": { "label": "Cous cous",  "g": 60 },
-    "pane":   { "label": "Pane",    "g": null }
+    "pane":   { "label": "Pane",    "g": 80 }
   },
 
   "breakfasts": {

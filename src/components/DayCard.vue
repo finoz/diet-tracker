@@ -182,9 +182,9 @@ function toggle() { isOpen.value = !isOpen.value }
 const { week, config } = useDiet()
 const { getLog, upsertLog, swapMap, addSwap } = useLog()
 
-// Carbs selezionabili (escluso pane, che è una voce separata)
+// Carbs selezionabili
 const selectableCarbs = computed(() =>
-  Object.entries(config.carbs).filter(([key]) => key !== 'pane')
+  Object.entries(config.carbs)
 )
 
 function resolveCarb(key) {
