@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import dietData from '../data/diet.json'
 
 const DAYS_ORDER = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']
@@ -7,22 +7,26 @@ const DAYS_IT = {
   thursday: 'Giovedì', friday: 'Venerdì', saturday: 'Sabato', sunday: 'Domenica'
 }
 
+// Offset settimane rispetto alla corrente (0 = oggi, -1 = scorsa, ecc.)
+// Stato a livello modulo: condiviso tra tutti i componenti
+const weekOffset = ref(0)
+
 export function useDiet() {
   const config = dietData
 
-  // Giorno corrente come chiave (monday, tuesday...)
+  // Giorno corrente come chiave, indipendente dalla navigazione
   const todayKey = computed(() => {
-    const jsDay = new Date().getDay() // 0=dom, 1=lun...
     const map = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday']
-    return map[jsDay]
+    return map[new Date().getDay()]
   })
 
-  // Settimana come array ordinato con label italiana
+  const todayStr = computed(() => new Date().toISOString().slice(0, 10))
+
+  // Settimana visualizzata (dipende da weekOffset)
   const week = computed(() => {
     const now = new Date()
-    const jsDay = now.getDay()
     const monday = new Date(now)
-    monday.setDate(now.getDate() - ((jsDay + 6) % 7))
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7) + weekOffset.value * 7)
     monday.setHours(0, 0, 0, 0)
 
     return DAYS_ORDER.map((key, i) => {
@@ -32,14 +36,19 @@ export function useDiet() {
       return {
         key,
         label: DAYS_IT[key],
-        isToday: key === todayKey.value,
+        isToday: dateStr === todayStr.value,
         dateStr,
         breakfast: resolveBreakfast(config.week[key].breakfast),
-        lunch: resolveMeal(config.week[key].lunch),
-        dinner: resolveMeal(config.week[key].dinner),
+        lunch:     resolveMeal(config.week[key].lunch),
+        dinner:    resolveMeal(config.week[key].dinner),
       }
     })
   })
+
+  const isCurrentWeek = computed(() => weekOffset.value === 0)
+
+  function goPrevWeek() { weekOffset.value-- }
+  function goNextWeek() { if (!isCurrentWeek.value) weekOffset.value++ }
 
   function resolveBreakfast(code) {
     return { code, ...config.breakfasts[code] }
@@ -49,29 +58,27 @@ export function useDiet() {
     if (!slot) return null
     const pattern = config.patterns[slot.pattern]
     const protein = slot.protein ? config.proteins[slot.protein] : null
-    const carb = slot.carb ? config.carbs[slot.carb] : null
-    const alt = slot.alt ? resolveMeal(slot.alt) : null
+    const carb    = slot.carb    ? config.carbs[slot.carb]       : null
+    const alt     = slot.alt     ? resolveMeal(slot.alt)          : null
     return {
       ...slot,
       patternLabel: pattern?.label,
-      patternKey: slot.pattern,
+      patternKey:   slot.pattern,
       proteinLabel: protein?.label,
-      proteinG: protein?.g ?? slot.protein_g,
-      carbLabel: carb?.label,
-      carbG: carb?.g,
+      proteinG:     protein?.g ?? slot.protein_g,
+      carbLabel:    carb?.label,
+      carbG:        carb?.g,
       alt,
     }
   }
 
-  // Conteggio proteine nella settimana default
+  // Conteggio proteine nella settimana default (usato da WeekView per il piano)
   const proteinSummary = computed(() => {
     const counts = {}
     DAYS_ORDER.forEach(day => {
       const d = config.week[day]
       ;[d.lunch, d.dinner].forEach(meal => {
-        if (meal?.protein) {
-          counts[meal.protein] = (counts[meal.protein] || 0) + 1
-        }
+        if (meal?.protein) counts[meal.protein] = (counts[meal.protein] || 0) + 1
       })
     })
     return Object.entries(config.proteins).map(([key, meta]) => ({
@@ -80,5 +87,5 @@ export function useDiet() {
     }))
   })
 
-  return { config, week, todayKey, proteinSummary, DAYS_IT }
+  return { config, week, todayKey, todayStr, proteinSummary, DAYS_IT, weekOffset, isCurrentWeek, goPrevWeek, goNextWeek }
 }

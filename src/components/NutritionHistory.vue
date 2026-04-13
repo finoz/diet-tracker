@@ -73,17 +73,18 @@ import { ref, computed } from 'vue'
 import { useDiet } from '../composables/useDiet.js'
 import { useLog } from '../composables/useLog.js'
 
-const { config } = useDiet()
+const { config, week } = useDiet()
 const { dailyLogs } = useLog()
 
 // ── Stato ─────────────────────────────────────────────────────────────────────
 
-const period = ref('1m')
+const period = ref('week')
 
 const PERIODS = [
-  { value: '1m',  label: 'mese' },
-  { value: '3m',  label: '3 mesi' },
-  { value: 'all', label: 'tutto' },
+  { value: 'week', label: 'questa settimana' },
+  { value: '1m',   label: 'mese' },
+  { value: '3m',   label: '3 mesi' },
+  { value: 'all',  label: 'tutto' },
 ]
 
 // ── Colori ────────────────────────────────────────────────────────────────────
@@ -147,19 +148,26 @@ function getProtein(dayKey, mealKey, log) {
 const totals = computed(() => {
   const entries = Object.entries(dailyLogs.value)
 
-  let cutoffStr = null
-  if (period.value !== 'all') {
-    const days   = period.value === '1m' ? 28 : 91
-    const cutoff = new Date()
+  let filterFn
+  if (period.value === 'week') {
+    const weekDates = new Set(week.value.map(d => d.dateStr))
+    filterFn = ([d]) => weekDates.has(d)
+  } else if (period.value !== 'all') {
+    const days    = period.value === '1m' ? 28 : 91
+    const cutoff  = new Date()
     cutoff.setDate(cutoff.getDate() - days)
-    cutoffStr = toDateStr(cutoff)
+    const cutoffStr = toDateStr(cutoff)
+    filterFn = ([d]) => d >= cutoffStr
+  } else {
+    filterFn = () => true
   }
+
+  const filteredEntries = entries.filter(filterFn)
 
   const proteins = {}
   const carbs    = {}
 
-  for (const [dateStr, log] of entries) {
-    if (cutoffStr && dateStr < cutoffStr) continue
+  for (const [dateStr, log] of filteredEntries) {
     const dayKey = getDayKey(dateStr)
 
     ;['lunch', 'dinner'].forEach(mealKey => {

@@ -110,6 +110,32 @@
   align-items: flex-end;
 }
 
+.week-nav {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  padding-bottom: 0.2rem;
+}
+
+.week-nav-btn {
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--ink-muted);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+
+  &:hover:not(:disabled) {
+    color: var(--ink);
+    background: var(--cream-dark);
+  }
+
+  &:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+}
+
 .week-title {
   font-size: 1.8rem;
   color: var(--ink);

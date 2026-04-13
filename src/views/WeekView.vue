@@ -3,8 +3,12 @@
 
     <div class="week-header">
       <div>
-        <h2 class="week-title">settimana corrente</h2>
+        <h2 class="week-title">{{ isCurrentWeek ? 'settimana corrente' : 'settimana passata' }}</h2>
         <p class="week-date">{{ weekRange }}</p>
+      </div>
+      <div class="week-nav">
+        <button class="week-nav-btn" @click="goPrevWeek" title="settimana precedente">‹</button>
+        <button class="week-nav-btn" @click="goNextWeek" :disabled="isCurrentWeek" title="settimana successiva">›</button>
       </div>
     </div>
 
@@ -36,7 +40,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, watch, onMounted } from 'vue'
 import { useDiet } from '../composables/useDiet.js'
 import { useLog } from '../composables/useLog.js'
 import { useAuth } from '../composables/useAuth.js'
@@ -47,7 +51,7 @@ import ActivityHeatmap from '../components/ActivityHeatmap.vue'
 import WeekSwaps from '../components/WeekSwaps.vue'
 import NutritionHistory from '../components/NutritionHistory.vue'
 
-const { week, todayKey, config } = useDiet()
+const { week, todayKey, config, isCurrentWeek, goPrevWeek, goNextWeek } = useDiet()
 const { user } = useAuth()
 const { fetchLogsForYear, fetchSwapsForWeek, getWeekStart, swapMap, dailyLogs, loading } = useLog()
 
@@ -121,6 +125,11 @@ const carbSummary = computed(() => {
     .filter(([key]) => key !== 'pane')
     .map(([key, meta]) => ({ key, ...meta, count: counts[key] || 0 }))
     .filter(c => c.count > 0)
+})
+
+// Re-fetch swap quando cambia settimana visualizzata
+watch(() => week.value[0]?.dateStr, async (dateStr) => {
+  if (dateStr) await fetchSwapsForWeek(new Date(dateStr + 'T00:00:00'))
 })
 
 onMounted(async () => {
