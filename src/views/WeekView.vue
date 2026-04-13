@@ -29,10 +29,10 @@
 
       <aside class="sidebar">
         <WeekSwaps />
-        <ProteinSummary v-if="user" :proteinSummary="proteinSummary" />
-        <CarbSummary v-if="user" :carbSummary="carbSummary" />
-        <ActivityHeatmap v-if="user" />
-        <NutritionHistory v-if="user" />
+        <ProteinSummary :proteinSummary="proteinSummary" />
+        <CarbSummary :carbSummary="carbSummary" />
+        <ActivityHeatmap />
+        <NutritionHistory />
       </aside>
     </div>
 
@@ -43,7 +43,6 @@
 import { computed, watch, onMounted } from 'vue'
 import { useDiet } from '../composables/useDiet.js'
 import { useLog } from '../composables/useLog.js'
-import { useAuth } from '../composables/useAuth.js'
 import DayCard from '../components/DayCard.vue'
 import ProteinSummary from '../components/ProteinSummary.vue'
 import CarbSummary from '../components/CarbSummary.vue'
@@ -52,7 +51,6 @@ import WeekSwaps from '../components/WeekSwaps.vue'
 import NutritionHistory from '../components/NutritionHistory.vue'
 
 const { week, todayKey, config, isCurrentWeek, goPrevWeek, goNextWeek } = useDiet()
-const { user } = useAuth()
 const { fetchLogsForYear, fetchSwapsForWeek, getWeekStart, swapMap, dailyLogs, loading } = useLog()
 
 function resolveMealForSummary(day, mealKey) {
