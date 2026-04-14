@@ -72,7 +72,7 @@ export function useDiet() {
       patternLabel: pattern?.label,
       patternKey:   slot.pattern,
       proteinLabel: protein?.label,
-      proteinG:     protein?.g ?? slot.protein_g,
+      proteinG:     slot.protein_g ?? (protein?.g != null ? config.meta.default_protein_g : null),
       carbLabel:    carb?.label,
       carbG:        carb?.g,
       alt,
