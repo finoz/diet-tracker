@@ -2,16 +2,12 @@
   <div class="nutrition-history">
 
     <div class="nh-header">
-      <h3 class="summary-title">nutrizione nel tempo</h3>
-      <div class="nh-period">
-        <button
-          v-for="p in PERIODS"
-          :key="p.value"
-          class="nh-period-btn"
-          :class="{ active: period === p.value }"
-          @click="period = p.value"
-        >{{ p.label }}</button>
-      </div>
+      <h3 class="summary-title">
+        Nutrienti
+        <select class="nh-period-select" v-model="period">
+          <option v-for="p in PERIODS" :key="p.value" :value="p.value">{{ p.label }}</option>
+        </select>
+      </h3>
     </div>
 
     <div v-if="isEmpty" class="nh-empty">
@@ -78,12 +74,12 @@ const { dailyLogs } = useLog()
 
 // ── Stato ─────────────────────────────────────────────────────────────────────
 
-const period = ref('week')
+const period = ref('1m')
 
 const PERIODS = [
   { value: 'week', label: 'questa settimana' },
-  { value: '1m',   label: 'mese' },
-  { value: '3m',   label: '3 mesi' },
+  { value: '1m',   label: 'questo mese' },
+  { value: '3m',   label: 'ultimi 3 mesi' },
   { value: 'all',  label: 'tutto' },
 ]
 

@@ -9,39 +9,24 @@
 // ── Header + period ───────────────────────────────────────────────────────────
 
 .nh-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
   margin-bottom: 1.25rem;
-
-  .summary-title { margin-bottom: 0; }
 }
 
-.nh-period {
-  display: flex;
-  gap: 0.2rem;
-  flex-shrink: 0;
-}
-
-.nh-period-btn {
-  font-size: 0.68rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: 20px;
-  border: 1px solid var(--cream-dark);
+.nh-period-select {
+  font-size: 0.75em;
   color: var(--ink-muted);
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  font-family: inherit;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dotted currentColor;
+  border-radius: 0;
+  padding: 0;
+  margin-left: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
 
-  &:hover {
-    border-color: var(--ink-muted);
-    color: var(--ink-soft);
-  }
-
-  &.active {
-    background: var(--ink);
-    color: var(--cream);
-    border-color: var(--ink);
-  }
+  &:focus { outline: none; }
 }
 
 // ── Sezione (proteina / carb) ─────────────────────────────────────────────────

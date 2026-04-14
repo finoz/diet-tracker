@@ -1,6 +1,6 @@
 <template>
   <div class="protein-summary">
-    <h3 class="summary-title">proteine questa settimana</h3>
+    <h3 class="summary-title">Proteine questa settimana</h3>
     <div class="protein-grid">
       <div
         v-for="p in proteinSummary"

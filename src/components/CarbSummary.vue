@@ -1,6 +1,6 @@
 <template>
   <div class="carb-summary">
-    <h3 class="summary-title">carboidrati questa settimana</h3>
+    <h3 class="summary-title">Carboidrati questa settimana</h3>
     <div class="protein-grid">
       <div v-for="c in carbSummary" :key="c.key" class="protein-item">
         <div class="protein-name">{{ c.label }}</div>
