@@ -20,7 +20,14 @@ export function useDiet() {
     return map[new Date().getDay()]
   })
 
-  const todayStr = computed(() => new Date().toISOString().slice(0, 10))
+  function localDateStr(date) {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
+
+  const todayStr = computed(() => localDateStr(new Date()))
 
   // Settimana visualizzata (dipende da weekOffset)
   const week = computed(() => {
@@ -32,7 +39,7 @@ export function useDiet() {
     return DAYS_ORDER.map((key, i) => {
       const d = new Date(monday)
       d.setDate(monday.getDate() + i)
-      const dateStr = d.toISOString().slice(0, 10)
+      const dateStr = localDateStr(d)
       return {
         key,
         label: DAYS_IT[key],
